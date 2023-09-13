@@ -9,6 +9,7 @@ from discord.ext import commands
 from bot_logger import logger
 from bot_init   import bot
 from bot_utils  import *
+from data import *
 
 # Import Bot Logger Files
 from logs.member_logs  import *
