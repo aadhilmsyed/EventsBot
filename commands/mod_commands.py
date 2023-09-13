@@ -2,8 +2,9 @@
 import discord
 from discord.ext import commands
 
-# Initialize the bot using the bot_init module
+# Import Bot & Logger Objects
 from bot_init import bot
+from bot_logger import logger
 
 # Import Necessary Local Files
 from logs.message_logs import log_purged_messages
@@ -81,7 +82,14 @@ async def purge(ctx, limit: int):
         return
 
     # Purge messages (limit + 1 to purge command message as well)
-    purged_messages = await ctx.channel.purge(limit + 1)
+    try: purged_messages = await ctx.channel.purge(limit + 1)
+    
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
     
     # Log the Purged Messages
-    await log_purged_messages(purged_messages, ctx.author.mention)
+    try:
+        await log_purged_messages(purged_messages, ctx.author.mention)
+        
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")

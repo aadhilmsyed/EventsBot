@@ -6,8 +6,9 @@ import discord
 from discord.ext import commands
 
 # Import Bot Utilities Files
-from bot_init  import bot
-from bot_utils import *
+from bot_logger import logger
+from bot_init   import bot
+from bot_utils  import *
 
 # Import Bot Logger Files
 from logs.member_logs  import *
@@ -24,6 +25,7 @@ from commands.mod_commands    import *
 from commands.random_commands import *
 
 # Start the Bot
+logger.info('Starting the bot...')
 bot.run(TOKEN)
 
 # TODO: Implement Welcome Function to Welcome New Members
