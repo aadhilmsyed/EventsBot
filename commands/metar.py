@@ -78,7 +78,7 @@ async def metar(ctx, icao_code : str):
         embed.add_field(name = "Raw METAR", value = f"{metar_data['rawOb']}")
         
         # Add airport picture as the thumbnail
-        image_url = await get_airport_image(f"{metar_data['name]}")
+        image_url = await get_airport_image(f"{metar_data['name']}")
         if image_url: embed.set_thumbnail(url = image_url)
 
         # Set Embed Footer
