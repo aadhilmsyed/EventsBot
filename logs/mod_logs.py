@@ -38,7 +38,7 @@ async def on_member_remove(member):
             title       = "Member Banned"
             description = f"{member} was banned by {entry.user}"
             color       = discord.Color.red()
-            reason      = reasons.get(member.id, None)
+            reason      = ban_reasons.get(member.id, None)
             await log_mod_action(title, description, color, member, entry.user, reason)
             return
 
@@ -48,7 +48,7 @@ async def on_member_remove(member):
             title       = "Member Kicked"
             description = f"{member} was kicked by {entry.user}"
             color       = discord.Color.orange()
-            reason      = reasons.get(member.id, None)
+            reason      = kick_reasons.get(member.id, None)
             await log_mod_action(title, description, color, member, entry.user, reason)
             return
 
