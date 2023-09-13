@@ -2,8 +2,9 @@
 import discord
 from discord.ext import commands
 
-# Import the Bot Object
+# Import the Bot & Logger Objects
 from bot_init import bot
+from bot_logger import logger
 
 # Import datetime library to check latency
 import datetime
@@ -38,7 +39,10 @@ async def ping(ctx):
         None
     """
     # Calculate the latency (ping)
-    latency = round(bot.latency * 1000)  # Convert to milliseconds
+    try: latency = round(bot.latency * 1000)  # Convert to milliseconds
+    
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
 
     # Send the latency as a message
     await ctx.send(f'Pong! Latency is {latency} ms')

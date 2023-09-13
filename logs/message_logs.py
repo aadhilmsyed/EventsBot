@@ -2,8 +2,9 @@
 import discord
 from discord.ext import commands
 
-# Import the Bot Object
+# Import Bot & Logger Objects
 from bot_init import bot
+from bot_logger import logger
 
 # Import Necessary Local Files
 from commands.random_commands import send_saw
@@ -25,24 +26,28 @@ async def on_message_delete(message):
         None
     """
     
-    # Send "SAW" in response to the deleted message
-    await send_saw(message.channel)
-    
-    # Checks if a log channel has been set
-    if message_logs_channel:
-    
-        # Create an Embed to log the Deleted Message
-        embed = discord.Embed(
-            title       = "Message Deleted",
-            description = f"Author: {message.author.mention}",
-            color       = discord.Color.red()
-        )
+    try:
+        # Send "SAW" in response to the deleted message
+        await send_saw(message.channel)
         
-        # Display the Message in the Embed
-        embed.add_field(name = "Content", value = message.content, inline = False)
+        # Checks if a log channel has been set
+        if message_logs_channel:
         
-        # Send the Embed to the Log Channel
-        await message_logs_channel.send(embed=embed)
+            # Create an Embed to log the Deleted Message
+            embed = discord.Embed(
+                title       = "Message Deleted",
+                description = f"Author: {message.author.mention}",
+                color       = discord.Color.red()
+            )
+            
+            # Display the Message in the Embed
+            embed.add_field(name = "Content", value = message.content, inline = False)
+            
+            # Send the Embed to the Log Channel
+            await message_logs_channel.send(embed=embed)
+    
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
 
 @bot.event
 async def on_message_edit(before, after):
@@ -58,51 +63,62 @@ async def on_message_edit(before, after):
         None
     """
     
-    # Checks if a log channel has been set
-    if message_logs_channel:
-    
-        # Create an Embed to log the Edited Message
-        embed = discord.Embed(
-            title       = "Message Edited",
-            description = f"Author: {before.author.mention}",
-            color       = discord.Color.orange()
-        )
+    try:
+        # Checks if a log channel has been set
+        if message_logs_channel:
         
-        # Display the Message Edit
-        embed.add_field(name = "Before", value = before.content, inline = False)
-        embed.add_field(name = "After",  value = after.content,  inline = False)
-        
-        # Send the embed to the log channel
-        await message_logs_channel.send(embed = embed)
+            # Create an Embed to log the Edited Message
+            embed = discord.Embed(
+                title       = "Message Edited",
+                description = f"Author: {before.author.mention}",
+                color       = discord.Color.orange()
+            )
+            
+            # Display the Message Edit
+            embed.add_field(name = "Before", value = before.content, inline = False)
+            embed.add_field(name = "After",  value = after.content,  inline = False)
+            
+            # Send the embed to the log channel
+            await message_logs_channel.send(embed = embed)
+       
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
+
         
 async def log_purged_messages(purged_messages, purged_by):
-
+    
     # Open a .txt file to save all the logged messages
     log_filename = "purged_messages.txt"
     with open(log_filename, "w", encoding="utf-8") as log_file:
         for message in purged_messages:
             log_file.write(f"{message.author.display_name}: {message.content}\n")
 
-    # Create an embed message to log purge info
-    embed = discord.Embed(
-        title="Message Purge",
-        description=f"{len(purged_messages)} messages purged by {purged_by.mention}",
-        color=discord.Color.dark_red()
-    )
-    embed.add_field(name="Channel", value=ctx.channel.mention, inline=False)
-    embed.add_field(name="Purged by", value=purged_by.mention, inline=False)
-    embed.set_thumbnail(url=purged_by.avatar_url)
+    try:
 
-    # Attach the .txt file to the embed
-    with open(log_filename, "rb") as file:
-        file_data = discord.File(file, filename=log_filename)
-        embed.set_file(file_data)
+        # Create an embed message to log purge info
+        embed = discord.Embed(
+            title="Message Purge",
+            description=f"{len(purged_messages)} messages purged by {purged_by.mention}",
+            color=discord.Color.dark_red()
+        )
+        embed.add_field(name="Channel", value=ctx.channel.mention, inline=False)
+        embed.add_field(name="Purged by", value=purged_by.mention, inline=False)
+        embed.set_thumbnail(url=purged_by.avatar_url)
 
-    # Send the embed message to the log channel
-    await message_logs_channel.send(embed=embed)
+        # Attach the .txt file to the embed
+        with open(log_filename, "rb") as file:
+            file_data = discord.File(file, filename=log_filename)
+            embed.set_file(file_data)
+
+        # Send the embed message to the log channel
+        await message_logs_channel.send(embed=embed)
+    
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
 
     # Remove the file from the operating system once finished
     os.remove(log_filename)
+        
 
 @bot.command()
 @commands.has_permissions(administrator = True)
