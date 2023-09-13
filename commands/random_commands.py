@@ -2,8 +2,9 @@
 import discord
 from discord.ext import commands
 
-# Initialize the bot using the bot_init module
+# Import Bot & Logger Objects
 from bot_init import bot
+from bot_logger import logger
 
 # Import Restricted Channels List from admin_commands
 from data import restricted_channels
