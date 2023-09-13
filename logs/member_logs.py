@@ -97,7 +97,7 @@ async def on_member_update(before, after):
                 role_change_str += f"Removed roles: {', '.join([role.mention for role in removed_roles])}"
             
             # Get the Responsible Moderator through Audit Logs
-            responsible_mod = get_responsible_mod(after)
+            responsible_mod = await get_responsible_mod(after)
             
             # Create an embed for the role update log with the user's avatar
             embed = discord.Embed(
@@ -136,7 +136,7 @@ async def on_member_nickname_update(member, before, after):
         if before.nick != after.nick:
         
             # Get the Responsible Moderator
-            responsible_mod = get_responsible_mod(member)
+            responsible_mod = await get_responsible_mod(member)
             
             # Create an embed for the nickname change log with the user's avatar
             embed = discord.Embed(
