@@ -14,7 +14,5 @@ server_logs_channel  = None
 voice_logs_channel   = None
 event_logs_channel   = None
 
-# API Request Parameters
-MAX_REQUESTS = 10
-TIME_WINDOW = 3600  # 1 hour in seconds
-request_timestamps = []
+# Embed Thumbnail for METAR commands
+metar_embed_thumbnail_url = "https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ="

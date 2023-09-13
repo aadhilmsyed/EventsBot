@@ -12,8 +12,7 @@ import requests
 import time
 import math
 
-# Import Necessary Local Files
-from data import MAX_REQUESTS, TIME_WINDOW, request_timestamps
+from data import metar_embed_thumbnail_url
 
 @bot.command()
 async def metar(ctx, icao_code : str):
@@ -29,12 +28,6 @@ async def metar(ctx, icao_code : str):
     """
     
     try:
-        # Check the Rate Limit (Terminate with Error Msg if Usage is Too High)
-        limit_exceeded, minutes, seconds = await check_rate_limit()
-        if limit_exceeded:
-            ctx.send(f"Rate Limit Exceeded. Please try again in {minutes} minutes and {seconds} seconds.")
-            return
-    
         # Perform Input Validation on the ICAO Airport Code
         if not icao_code.isalnum() or not (len(icao_code) == 4):
             await ctx.send ("Invalid ICAO code format. It must 4 alphanumeric characters.")
@@ -78,9 +71,8 @@ async def metar(ctx, icao_code : str):
         embed.add_field(name = "Raw METAR", value = f"{metar_data['rawOb']}")
 
         # Add airport picture as the thumbnail
-        search_query = metar_data['name'].split(",")[0]
-        image_url = await get_airport_image(search_query)
-        if image_url: embed.set_thumbnail(url = image_url)
+        global metar_embed_thumbnail_url
+        embed.set_thumbnail(url = metar_embed_thumbnail_url)
 
         # Set Embed Footer
         text = "Data Provided by Aviation Weather Center API.\nImage Provided by Unsplash API."
@@ -158,33 +150,3 @@ async def get_airport_image(icao_code : str):
     return None
 
 import time
-
-# Function to check rate limit and record request timestamps
-async def check_rate_limit():
-    
-    # Store the Current Time
-    current_time = time.time()
-
-    # Remove timestamps that are older than the time window
-    request_timestamps[:] = [timestamp for timestamp in request_timestamps if current_time - timestamp <= TIME_WINDOW]
-    
-    # Define minutes and seconds variables
-    minutes, seconds = 0, 0
-
-  # Check if the rate limit is exceeded
-    if len(request_timestamps) >= MAX_REQUESTS:
-    
-        # Calculate remaining time
-        remaining_time = int((request_timestamps[user_id][0] + TIME_WINDOW) - current_time)
-
-        # Calculate minutes and seconds
-        minutes, seconds = divmod(remaining_time, 60)
-    
-        # Return Rate Limit Exceeded
-        return True, minutes, seconds
-
-    # Record the current request timestamp
-    request_timestamps.append(current_time)
-    
-    # Return Rate Limit Not Exceeded
-    return False, minutes, seconds
