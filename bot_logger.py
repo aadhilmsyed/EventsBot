@@ -7,7 +7,7 @@ logger = logging.getLogger('events_bot_logger')
 logger.setLevel(logging.ERROR)  # Log only error messages or higher
 
 # Create a file handler to write log messages to a file
-file_handler = logging.FileHandler('bot_error.txt')
+file_handler = logging.FileHandler('log_file.txt')
 
 # Create a formatter with the desired format
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
