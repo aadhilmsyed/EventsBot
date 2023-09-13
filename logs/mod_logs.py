@@ -38,7 +38,7 @@ async def on_member_remove(member):
             title       = "Member Banned"
             description = f"{member} was banned by {entry.user}"
             color       = discord.Color.red()
-            reason      = reasons.get(member.id, None)
+            reason      = ban_reasons.get(member.id, None)
             await log_mod_action(title, description, color, member, entry.user, reason)
             return
 
@@ -48,7 +48,7 @@ async def on_member_remove(member):
             title       = "Member Kicked"
             description = f"{member} was kicked by {entry.user}"
             color       = discord.Color.orange()
-            reason      = reasons.get(member.id, None)
+            reason      = kick_reasons.get(member.id, None)
             await log_mod_action(title, description, color, member, entry.user, reason)
             return
 
@@ -58,16 +58,17 @@ async def on_member_remove(member):
 @bot.event
 async def on_member_unban(guild, user):
     title       = "Member Unbanned"
-    description = f"{member} was unbanned; reason for ban below"
+    description = f"{user} was unbanned; reason for ban below"
     color       = discord.Color.green()
-    await log_mod_action(title, description, color, user, )
+    reason      = ban_reasons.get(member.id, None)
+    await log_mod_action(title, description, color, user, reason)
 
 @bot.event
 async def on_member_timeout(member):
-    title       = "Member Unbanned"
-    description = f"{member} was unbanned. Reason for ban below"
+    title       = "Member Timed Out"
+    description = f"{member} was timed out"
     color       = discord.Color.green()
-    await log_mod_action(title, description, color, user, )
+    await log_mod_action(title, description, color, user)
 
 @bot.command()
 @commands.has_permissions(administrator=True)

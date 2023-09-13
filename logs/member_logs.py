@@ -31,7 +31,7 @@ async def on_member_join(member):
             color       = discord.Color.green()
         )
         
-        embed.set_thumbnail(url = member.avatar_url)
+        embed.set_thumbnail(url = member.avatar)
         
         # Send the embed to the member logs channel
         await member_logs_channel.send(embed = embed)
@@ -59,7 +59,7 @@ async def on_member_left(member):
             color       = discord.Color.red()
         )
         
-        embed.set_thumbnail(url = member.avatar_url)  # Include user's avatar in the embed
+        embed.set_thumbnail(url = member.avatar)  # Include user's avatar in the embed
         
         # Send the embed to the member logs channel
         await member_logs_channel.send(embed = embed)
@@ -109,7 +109,7 @@ async def on_member_update(before, after):
             # Add the Changed Roles, Moderator, and Avatar to the Embed
             embed.add_field(name = "Role Changes",          value = role_change_str, inline = False)
             embed.add_field(name = "Responsible Moderator", value = responsible_mod, inline = False)
-            embed.set_thumbnail(url = after.avatar_url)  # Include user's avatar in the embed
+            embed.set_thumbnail(url = after.avatar)  # Include user's avatar in the embed
             
             # Send the Embed Message to the Channel
             await member_logs_channel.send(embed = embed)
@@ -149,7 +149,7 @@ async def on_member_nickname_update(member, before, after):
             embed.add_field(name = "Before",                value = before.nick,     inline = False)
             embed.add_field(name = "After",                 value = after.nick,      inline = False)
             embed.add_field(name = "Responsible Moderator", value = responsible_mod, inline = False)
-            embed.set_thumbnail(url = member.avatar_url)  # Include user's avatar in the embed
+            embed.set_thumbnail(url = member.avatar)  # Include user's avatar in the embed
             
             # Send the Embed Message to Log Channel
             await member_logs_channel.send(embed = embed)
