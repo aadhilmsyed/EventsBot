@@ -1,0 +1,2 @@
+2023-09-13 13:49:39,139 - events_bot_logger - ERROR - An error occurred: 0, message='Attempt to decode JSON with unexpected mimetype: text/xml', url=URL('https://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=atis&requestType=retrieve&format=json&stationString=KSFO')
+2023-09-13 13:49:46,286 - events_bot_logger - ERROR - An error occurred: 0, message='Attempt to decode JSON with unexpected mimetype: ', url=URL('https://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=metars&requestType=retrieve&format=json&stationString=KSFO')
