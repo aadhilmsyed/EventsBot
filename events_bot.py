@@ -20,7 +20,7 @@ from logs.voice_logs   import *
 from logs.event_logs   import *
 
 # Import Bot Command Files
-from commands.atis_metar      import *
+from commands.metar           import *
 from commands.member_commands import *
 from commands.mod_commands    import *
 from commands.random_commands import *
