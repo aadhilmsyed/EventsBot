@@ -5,8 +5,9 @@ from discord.ext import commands
 # Import Other Necessary Libraries
 import aiohttp
 
-# Initialize the bot using the bot_init module
+# Import Bot & Logger Objects
 from bot_init import bot
+from bot_logger import logger
 
 # Global Variable to store the aviation weather API URL
 aviation_weather_api_url = "https://aviationweather.gov/adds/dataserver_current/httpparam"
@@ -23,23 +24,27 @@ async def get_weather_info(airport_icao, info_type):
         str: The METAR or ATIS information for the specified airport.
     """
     
-    # Set the data source or METAR or ATIS
-    data_source = "metars" if info_type == "metar" else "atis"
-    
-    # Connect with the API to get Information
-    async with aiohttp.ClientSession() as session:
-        async with session.get(aviation_weather_api_url, params = {
-            "dataSource":    data_source,
-            "requestType":   "retrieve",
-            "format":        "json",
-            "stationString": airport_icao,
-        }) as response: data = await response.json()
+    try:
+        # Set the data source or METAR or ATIS
+        data_source = "metars" if info_type == "metar" else "atis"
+        
+        # Connect with the API to get Information
+        async with aiohttp.ClientSession() as session:
+            async with session.get(aviation_weather_api_url, params = {
+                "dataSource":    data_source,
+                "requestType":   "retrieve",
+                "format":        "json",
+                "stationString": airport_icao,
+            }) as response: data = await response.json()
 
-
-    if info_type.upper() in data["response"]:
-        return data["response"][info_type.upper()]
-    else:
-        return f"{info_type.upper()} not available for {airport_icao}"
+        
+        if info_type.upper() in data["response"]:
+            return data["response"][info_type.upper()]
+        else:
+            return f"{info_type.upper()} not available for {airport_icao}"
+            
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
 
 @bot.command()
 async def atis(ctx, airport_icao: str):
@@ -55,6 +60,8 @@ async def atis(ctx, airport_icao: str):
         None
     """
     try:
+        
+        # Get the ATIS info from the API
         atis_info = await get_weather_info(airport_icao, "atis")
 
         # Create an embed to display the ATIS information
@@ -66,8 +73,8 @@ async def atis(ctx, airport_icao: str):
 
         await ctx.send(embed=embed)
 
-    except Exception as e:
-        await ctx.send(f"An error occurred: {e}")
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
 
 @bot.command()
 async def metar(ctx, airport_icao: str):
@@ -83,6 +90,8 @@ async def metar(ctx, airport_icao: str):
         None
     """
     try:
+    
+        # Get the METAR info from the API
         metar_info = await get_weather_info(airport_icao, "metar")
 
         # Create an embed to display the METAR information
@@ -94,5 +103,5 @@ async def metar(ctx, airport_icao: str):
 
         await ctx.send(embed=embed)
 
-    except Exception as e:
-        await ctx.send(f"An error occurred: {e}")
+    # Log any Errors
+    except Exception as e: logger.error(f"An error occurred: {e}")
