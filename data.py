@@ -13,3 +13,8 @@ mod_logs_channel     = None
 server_logs_channel  = None
 voice_logs_channel   = None
 event_logs_channel   = None
+
+# API Request Parameters
+MAX_REQUESTS = 10
+TIME_WINDOW = 3600  # 1 hour in seconds
+request_timestamps = []
