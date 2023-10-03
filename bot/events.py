@@ -8,7 +8,6 @@ from bot.logger.init import logger
 
 # Import Necessary Local Files
 from bot.logger.parser import export_logfile
-from events.flight_logs import check_event_start
 
 # Import datetime library to check latency
 import datetime
@@ -31,9 +30,6 @@ async def on_ready():
     
     # Update Logger with Login Information
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
-    
-    # Start the Event Activity Status
-    check_event_start.start()
 
 
 @bot.event
