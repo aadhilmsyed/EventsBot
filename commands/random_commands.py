@@ -54,5 +54,26 @@ async def send_saw(channel):
     
     # If not in restricted channels, print SAW
     await channel.send("SAW")
+    
+@bot.event
+async def on_message_delete(message):
+    """
+    Description:
+        Event Handler Function that calls the send_saw function when a message is deleted.
+
+    Parameters:
+        message (discord.Message): The deleted message object.
+
+    Returns:
+        None
+    """
+    
+    try:
+        # Send "SAW" in response to the deleted message
+        await send_saw(message.channel)
+        logger.info(f"Sent saw in {message.channel.name} for deleted message.")
+        
+    except Exception as e:
+        logger.error(e)
 
 #TODO: Implement Avatar Function

@@ -1,31 +1,23 @@
-# Import Discord Libraries
+# Import Discord Python Libraries
 import discord
 from discord.ext import commands
 
-# Import Bot Utilities Files
-from bot_logger import logger
-from bot_init   import bot, TOKEN
-from bot_utils  import *
-from data import *
+# Import the Bot Module Files
+from bot.init import bot
+from bot.events import *
+from bot.logger.init import logger
 
-# Import Bot Logger Files
-from logs.member_logs  import *
-from logs.message_logs import *
-from logs.mod_logs     import *
-from logs.server_logs  import *
-from logs.voice_logs   import *
-from logs.event_logs   import *
+# Import the Data Module File
+from data.token import TOKEN
+from data.data import *
 
-# Import Bot Command Files
-from commands.metar           import *
+# Import the Command Module Files
+from commands.metar import *
 from commands.member_commands import *
-from commands.mod_commands    import *
+from commands.mod_commands import *
 from commands.random_commands import *
 
 # Start the Bot
 logger.info('Starting the bot...')
 bot.run(TOKEN)
 
-# TODO: Implement Welcome Function to Welcome New Members
-# TODO: Implement Server Info Function
-# TODO: Implmement Help Function
