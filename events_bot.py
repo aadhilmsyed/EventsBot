@@ -17,6 +17,9 @@ from commands.member_commands import *
 from commands.mod_commands import *
 from commands.random_commands import *
 
+# Import the Events Module Files
+from events.flight_logs import *
+
 # Start the Bot
 logger.info('Starting the bot...')
 bot.run(TOKEN)

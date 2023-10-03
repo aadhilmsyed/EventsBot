@@ -22,6 +22,7 @@ async def on_voice_state_update(member, before, after):
     # If the User has joined the vc, start their timer
     if after.channel and after.channel.id in voice_channels:
         start_time[member] = time.now()
+        logger.info(f"{member} Joined the Event. Starting Logging...")
         
     # If the User left the vc, then stop their timer and add it to flight logs
     if before.channel and before.channel.id in voice_channels:
@@ -30,7 +31,9 @@ async def on_voice_state_update(member, before, after):
         if member not in start_time: return
         
         # Calculate the flight time and add it to the member's flight hours
-        flight_hours[member] += (time.now() - start_time[member])
+        elapsed_time =time.now() - start_time[member]
+        flight_hours[member] += elapsed_time
+        logger.info(f"{member} Left the Event. Logging Complete ({elapsed_time}).")
         
         # Remove the user from the tracking dictionary
         del start_time[member]
@@ -40,8 +43,11 @@ async def on_voice_state_update(member, before, after):
 def is_event_active():
 
     # Return True if any Event is Active
-    for event in scheduled_events: if scheduled_events[event]: return True
-
+    for event in scheduled_events:
+        if scheduled_events[event]:
+            logger.info(f"Starting Logging for Event '{event.name}'")
+            return True
+        
     # Return False if no Events are Active
     return False
     
@@ -51,6 +57,7 @@ async def on_scheduled_event_create(event):
 
     # Add the Event to the Scheduled Events List
     scheduled_events[event] = False if (time.now() < event.start_time) else True
+    logger.info(f"Added Event '{event.name}' to Scheduled Events.")
     
     # Log Current Members if the Event has Started
     if scheduled_events[event]: log_vc_members(event.guild)
@@ -64,6 +71,7 @@ async def on_scheduled_event_delete(event):
     
     # Delete the Event from the Scheduled Events List
     del scheduled_events[event]
+    logger.info(f"Added Event '{event.name}' to Scheduled Events.")
     
 
 @bot.event
@@ -71,9 +79,11 @@ async def on_scheduled_event_update(before, after):
     
     # Remove the previous event from the scheduled events list
     del scheduled_events[before]
+    logger.info(f"Removed Event '{before.name}' to Scheduled Events.")
     
     # Add the updated Event to the Scheduled Events List
     scheduled_events[after] = False if (time.now() < after.start_time) else True
+    logger.info(f"Added Event '{after.name}' to Scheduled Events.")
     
     # Log Current Members if the updated Event has Started
     if scheduled_events[after]: log_vc_members(after.guild)
@@ -90,6 +100,7 @@ async def update_event_status():
         
             # Set Event Status to Active
             scheduled_events[event] = True
+            logger.info(f"Starting Logging for Event '{event.name}'")
             
             # Log any Members who might Already Be in Voice Channel (Edge Case)
             log_vc_members(event.guild)
@@ -110,6 +121,7 @@ def log_vc_members(guild):
             
             # Start their Flight Timer
             start_time[member] = time.now()
+            logger.info(f"{member} Joined the Event. Starting Logging...")
             
 
 def update_flight_hours():
@@ -118,7 +130,9 @@ def update_flight_hours():
     for member, start in start_time.items():
     
         # Increment their flight hours with the elapsed time
-        flight_hours[member] += (time.now() - start)
+        elapsed_time = time.now() - start
+        flight_hours[member] += elapsed_time
+        logger.info(f"{member} Left the Event. Logging Complete ({elapsed_time}).")
         
         # Delete that member instance from start times
         del start_time[member]
