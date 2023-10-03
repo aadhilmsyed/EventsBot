@@ -52,6 +52,6 @@ async def on_disconnect():
         None
     """
     logger.info('Bot Disconnecting. Exporting log data...')
-    export_logfile()
+    await export_logfile()
     logger.info('Log Data Exported.')
 

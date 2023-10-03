@@ -13,7 +13,7 @@ import time
 import math
 
 # Import Necessary Local Files
-from data.data import metar_embed_thumbnail_url
+from config import metar_embed_thumbnail_url
 from data.keys import unsplash_api_key
 
 @bot.command()
