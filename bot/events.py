@@ -6,8 +6,9 @@ from discord.ext import commands
 from bot.init import bot
 from bot.logger.init import logger
 
-
+# Import Necessary Local Files
 from bot.logger.parser import export_logfile
+from events.flight_logs import update_event_status
 
 # Import datetime library to check latency
 import datetime
@@ -27,7 +28,13 @@ async def on_ready():
     Returns:
         None
     """
+    
+    # Update Logger with Login Information
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+    
+    # Start the Event Activity Status
+    update_event_status.start()
+
 
 @bot.event
 async def on_disconnect():
