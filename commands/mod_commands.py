@@ -7,7 +7,7 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Necessary Local Files
-from data.data import restricted_channels
+from config import restricted_channels
 from bot.logger.parser import export_logfile
 
 # Import Other Necessary Libraries
