@@ -8,6 +8,11 @@ from bot.logger.init import logger
 
 # Import Necessary Local Files
 from data.data import restricted_channels
+from bot.logger.parser import export_logfile
+
+# Import Other Necessary Libraries
+import pandas as pd
+import io
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
@@ -59,3 +64,37 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
                 
     # Log any Errors:
     except Exception as e: logger.error(e)
+
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def check_bot_logs(ctx):
+    """
+    Command to export and send bot logs in CSV format to the current channel.
+
+    Parameters:
+        ctx (discord.ext.commands.Context): The context object representing the command's context.
+
+    Returns:
+        None
+    """
+    
+    try:
+        # Export the log data as a DataFrame
+        log_data = await export_logfile()
+        
+        if log_data is not None:
+            # Convert the DataFrame to CSV format
+            csv_data = log_data.to_csv(index=False)
+            
+            # Send the CSV data as a file
+            await ctx.send(content="Bot Logs:", file=discord.File(
+                filename="bot_logs.csv",
+                fp=io.StringIO(csv_data)  # Use io.StringIO here
+            ))
+            logger.info("Bot Logs File was sent to {ctx.channel}")
+        else:
+            await ctx.send("No log data available.")
+            logger.info("Bot Logs File could not be created.")
+    
+    except Exception as e:
+        logger.error(e)

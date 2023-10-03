@@ -19,7 +19,7 @@ async def ping(ctx):
         None
     """
     
-    logger.info("'ping' command was issued by {ctx.author}")
+    logger.info(f"'ping' command was issued by {ctx.author}")
     
     # Calculate the latency (ping)
     try: latency = round(bot.latency * 1000)  # Convert to milliseconds

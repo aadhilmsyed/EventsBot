@@ -9,9 +9,6 @@ from bot.logger.init import logger
 # Import Restricted Channels List from admin_commands
 from data.data import restricted_channels
 
-# Import Other Libraries
-import asyncio
-
 @bot.command()
 async def dotspam(ctx, limit: int = 10):
     """
@@ -58,10 +55,8 @@ async def send_saw(channel, author):
     if channel.id in restricted_channels: return
     
     # Print SAW and self-delete after 5 seconds
-    sent_message = await channel.send("SAW")
-    await asyncio.sleep(5)
-    await sent_message.delete()
-    logger.info(f"'SAW' was sent to {channel.mention} after message delete by {author}.")
+    await channel.send("SAW")
+    logger.info(f"'SAW' was sent to {channel} after message delete by {author}.")
     
 @bot.event
 async def on_message_delete(message):
