@@ -1,1 +1,0 @@
-unsplash_api_key = 'S4v0a9mxDRksIXG1GsuVkh28PwXfE7kptHEqQGHqKhE'
