@@ -7,7 +7,7 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Restricted Channels List from admin_commands
-from data import restricted_channels
+from data.data import restricted_channels
 
 @bot.command()
 async def dotspam(ctx, limit: int = 10):

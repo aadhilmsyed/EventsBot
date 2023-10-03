@@ -1,6 +1,6 @@
 import logging
 import logging.handlers
-from json_formatter import JsonFormatter
+from bot.logger.formatter import JsonFormatter
 
 # Create a Logger Object
 logger = logging.getLogger('events_bot_logger')

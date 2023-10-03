@@ -3,3 +3,6 @@ data/token.py
 
 # Ignore the API Keys
 data/keys.py
+
+# Ignore the Log File
+log_file.json
