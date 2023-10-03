@@ -1,10 +1,10 @@
-# Import Discord Libraries
+# Import Discord Python Libraries
 import discord
 from discord.ext import commands
 
 # Import Bot & Logger Objects
-from bot_init import bot
-from bot_logger import logger
+from bot.init import bot
+from bot.logger.init import logger
 
 # Import Necessary Local Files
 from data import restricted_channels
@@ -26,8 +26,10 @@ async def add_restricted_channel(ctx, channel: discord.TextChannel):
     if channel.id not in restricted_channels:
         restricted_channels.append(channel.id)
         await ctx.send(f"{channel.mention} is now a restricted announcement channel.")
+        logger.info(f"{channel.mention} was added as a restricted announcement channel by {ctx.author}")
     else:
         await ctx.send(f"{channel.mention} is already a restricted announcement channel.")
+        
 
 @bot.command()
 @commands.has_permissions(administrator = True)
@@ -46,5 +48,6 @@ async def remove_restricted_channel(ctx, channel: discord.TextChannel):
     if channel.id in restricted_channels:
         restricted_channels.remove(channel.id)
         await ctx.send(f"{channel.mention} is no longer a restricted announcement channel.")
+                logger.info(f"{channel.mention} was removed as a restricted announcement channel by {ctx.author}")
     else:
         await ctx.send(f"{channel.mention} is not a restricted announcement channel.")

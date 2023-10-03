@@ -1,10 +1,10 @@
-# Import Discord Libraries
+# Import Discord Python Libraries
 import discord
 from discord.ext import commands
 
 # Import Bot & Logger Objects
-from bot_init import bot
-from bot_logger import logger
+from bot.init import bot
+from bot.logger.init import logger
 
 # Import Restricted Channels List from admin_commands
 from data import restricted_channels
@@ -23,6 +23,8 @@ async def dotspam(ctx, limit: int = 10):
         None
     """
     
+    logger.info(f"'dotspam' command issued by {ctx.author} with limit {limit}.")
+    
     # Convert the Argument to Integer, throw Error if not an integer
     try: limit = int(limit)
     except ValueError:
@@ -37,7 +39,7 @@ async def dotspam(ctx, limit: int = 10):
     # Print as many times as the limit
     for _ in range(limit): await ctx.send(".")
     
-async def send_saw(channel):
+async def send_saw(channel, author):
     """
     Description:
         Responds with a saw to a deleted message when called by logs.message_logs.on_message_delete()
@@ -54,6 +56,7 @@ async def send_saw(channel):
     
     # If not in restricted channels, print SAW
     await channel.send("SAW")
+    logger.info(f"'SAW' was sent to {channel.mention} after message delete by {author}.")
     
 @bot.event
 async def on_message_delete(message):
@@ -70,10 +73,7 @@ async def on_message_delete(message):
     
     try:
         # Send "SAW" in response to the deleted message
-        await send_saw(message.channel)
-        logger.info(f"Sent saw in {message.channel.name} for deleted message.")
+        await send_saw(message.channel, message.author)
         
     except Exception as e:
         logger.error(e)
-
-#TODO: Implement Avatar Function
