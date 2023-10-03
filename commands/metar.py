@@ -1,10 +1,10 @@
-# Import Discord Libraries
+# Import Discord Python Libraries
 import discord
 from discord.ext import commands
 
 # Import Bot & Logger Objects
-from bot_init import bot
-from bot_logger import logger
+from bot.init import bot
+from bot.logger.init import logger
 
 # Import Other Necessary Libraries
 import aiohttp
@@ -12,7 +12,9 @@ import requests
 import time
 import math
 
-from data import metar_embed_thumbnail_url
+# Import Necessary Local Files
+from data.data import metar_embed_thumbnail_url
+from data.keys import unsplash_api_key
 
 @bot.command()
 async def metar(ctx, icao_code : str):
@@ -27,6 +29,8 @@ async def metar(ctx, icao_code : str):
         None
     """
     
+    logger.info(f"'METAR' command issued by {ctx.author}.")
+    
     try:
         # Perform Input Validation on the ICAO Airport Code
         if not icao_code.isalnum() or not (len(icao_code) == 4):
@@ -34,12 +38,14 @@ async def metar(ctx, icao_code : str):
             return
             
         # Get the METAR data from the API
+        logger.info("Connecting to external weather report API...")
         metar_data = await get_metar_info(icao_code)
         
         # Send Error Message and Exit Function if No Information was Retrieved
         if metar_data == None:
             await ctx.send(f"Unable to retrieve METAR info for {icao_code}")
             return
+        else: logger.info("Successfully Retrieved METAR Information for {icao_code}.")
 
         # Create an embed
         embed = discord.Embed(
@@ -81,7 +87,7 @@ async def metar(ctx, icao_code : str):
         await ctx.send(embed = embed)
     
     # Log any Errors
-    except Exception as e: logger.error(f"An error occurred: {e}")
+    except Exception as e: logger.error(e)
     
     
 async def get_metar_info(icao_code : str):
@@ -114,39 +120,34 @@ async def get_metar_info(icao_code : str):
         else: return None
 
     # Log any Errors
-    except Exception as e: logger.error(f"An error occurred: {e}")
+    except Exception as e: logger.error(e)
 
 
-# Function to fetch an image of an airport using its ICAO code
-async def get_airport_image(icao_code : str):
-
-    # Set up your Unsplash API credentials (replace with your own API key)
-    api_key = 'S4v0a9mxDRksIXG1GsuVkh28PwXfE7kptHEqQGHqKhE'
-
-    # Define the query for the airport using its ICAO code
-    search_query = f"{icao_code} airport"
-
-    # Construct the URL for the Unsplash API search
-    url = f"https://api.unsplash.com/search/photos/?query={search_query}&client_id={api_key}"
-
-    try:
-        # Send a GET request to the Unsplash API
-        response = requests.get(url)
-
-        # Check if the request was successful (status code 200)
-        if response.status_code == 200:
-            data = response.json()
-
-            # Check if there are any results
-            if 'results' in data and len(data['results']) > 0:
-                # Get the URL of the first image in the results
-                image_url = data['results'][0]['urls']['regular']
-                return image_url
-
-    # Log any Errors
-    except Exception as e: logger.error(f"An error occurred: {e}")
-
-    # Return None if no image was found
-    return None
-
-import time
+## Function to fetch an image of an airport using its ICAO code
+#async def get_airport_image(icao_code : str):
+#
+#    # Define the query for the airport using its ICAO code
+#    search_query = f"{icao_code} airport"
+#
+#    # Construct the URL for the Unsplash API search
+#    url = f"https://api.unsplash.com/search/photos/?query={search_query}&client_id={unsplash_api_key}"
+#
+#    try:
+#        # Send a GET request to the Unsplash API
+#        response = requests.get(url)
+#
+#        # Check if the request was successful (status code 200)
+#        if response.status_code == 200:
+#            data = response.json()
+#
+#            # Check if there are any results
+#            if 'results' in data and len(data['results']) > 0:
+#                # Get the URL of the first image in the results
+#                image_url = data['results'][0]['urls']['regular']
+#                return image_url
+#
+#    # Log any Errors
+#    except Exception as e: logger.error(f"An error occurred: {e}")
+#
+#    # Return None if no image was found
+#    return None

@@ -20,4 +20,3 @@ from commands.random_commands import *
 # Start the Bot
 logger.info('Starting the bot...')
 bot.run(TOKEN)
-
