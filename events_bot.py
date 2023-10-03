@@ -1,13 +1,10 @@
-# Store the Discord Bot Token
-TOKEN = 'MTE0OTUwNjI2MTExMzY0MzA4Mw.GyxGyO.xyVPFsGrMOz_izZ-0aRKNYBb0obznJsjdn1qIE'
-
 # Import Discord Libraries
 import discord
 from discord.ext import commands
 
 # Import Bot Utilities Files
 from bot_logger import logger
-from bot_init   import bot
+from bot_init   import bot, TOKEN
 from bot_utils  import *
 from data import *
 
