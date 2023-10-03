@@ -1,0 +1,3 @@
+# Ignore the Bot Initialization Module
+bot_init.py
+bot_logger.py
