@@ -1,2 +1,5 @@
 # Ignore the Bot Initialization Module
-token.py
+data/token.py
+
+# Ignore the API Keys
+data/keys.py
