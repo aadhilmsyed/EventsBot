@@ -1,8 +1,5 @@
-# Ignore the Bot Initialization Module
-data/token.py
-
-# Ignore the API Keys
-data/keys.py
-
-# Ignore the Log File
+data/*.py
+data/*.json
+data/*.txt
+data/*.csv
 log_file.json
