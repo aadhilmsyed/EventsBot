@@ -12,6 +12,7 @@ from data.data import voice_channels, scheduled_events
 
 # Import Other Necessary Libraries
 from datetime import datetime as time
+import pytz
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -21,7 +22,7 @@ async def on_voice_state_update(member, before, after):
 
     # If the User has joined the vc, start their timer
     if after.channel and after.channel.id in voice_channels:
-        start_time[member] = time.now()
+        start_time[member] = time.now(pytz.utc)
         logger.info(f"{member} Joined the Event. Starting Logging...")
         
     # If the User left the vc, then stop their timer and add it to flight logs
@@ -31,7 +32,7 @@ async def on_voice_state_update(member, before, after):
         if member not in start_time: return
         
         # Calculate the flight time and add it to the member's flight hours
-        elapsed_time =time.now() - start_time[member]
+        elapsed_time =time.now(pytz.utc) - start_time[member]
         flight_hours[member] += elapsed_time
         logger.info(f"{member} Left the Event. Logging Complete ({elapsed_time}).")
         
@@ -56,7 +57,7 @@ def is_event_active():
 async def on_scheduled_event_create(event):
 
     # Add the Event to the Scheduled Events List
-    scheduled_events[event] = False if (time.now() < event.start_time) else True
+    scheduled_events[event] = False if (time.now(pytz.utc) < event.start_time) else True
     logger.info(f"Added Event '{event.name}' to Scheduled Events.")
     
     # Log Current Members if the Event has Started
@@ -82,7 +83,7 @@ async def on_scheduled_event_update(before, after):
     logger.info(f"Removed Event '{before.name}' to Scheduled Events.")
     
     # Add the updated Event to the Scheduled Events List
-    scheduled_events[after] = False if (time.now() < after.start_time) else True
+    scheduled_events[after] = False if (time.now(pytz.utc) < after.start_time) else True
     logger.info(f"Added Event '{after.name}' to Scheduled Events.")
     
     # Log Current Members if the updated Event has Started
@@ -96,7 +97,7 @@ async def update_event_status():
     for event in scheduled_events:
     
         # If the start time for any event has passed
-        if time.now() > event.start_time:
+        if time.now(pytz.utc) > event.start_time:
         
             # Set Event Status to Active
             scheduled_events[event] = True
@@ -120,7 +121,7 @@ def log_vc_members(guild):
         for member in voice_channel.members:
             
             # Start their Flight Timer
-            start_time[member] = time.now()
+            start_time[member] = time.now(pytz.utc)
             logger.info(f"{member} Joined the Event. Starting Logging...")
             
 
@@ -130,7 +131,7 @@ def update_flight_hours():
     for member, start in start_time.items():
     
         # Increment their flight hours with the elapsed time
-        elapsed_time = time.now() - start
+        elapsed_time = time.now(pytz.utc) - start
         flight_hours[member] += elapsed_time
         logger.info(f"{member} Left the Event. Logging Complete ({elapsed_time}).")
         
