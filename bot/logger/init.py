@@ -7,7 +7,7 @@ logger = logging.getLogger('events_bot_logger')
 logger.setLevel(logging.INFO)
 
 # Create a JSON file handler to write log messages to a file with rotation
-file_handler = logging.handlers.RotatingFileHandler('log_file.json', maxBytes = 5 * (2**20), backupCount = 1)
+file_handler = logging.handlers.RotatingFileHandler('data/log_file.json', maxBytes = 5 * (2**20), backupCount = 1)
 
 # Create a custom JSON formatter
 json_formatter = JsonFormatter()

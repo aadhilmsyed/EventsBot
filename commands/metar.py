@@ -14,7 +14,7 @@ import math
 
 # Import Necessary Local Files
 from config import metar_embed_thumbnail_url
-from data.keys import unsplash_api_key
+#from data.keys import unsplash_api_key
 
 @bot.command()
 async def metar(ctx, icao_code : str):
