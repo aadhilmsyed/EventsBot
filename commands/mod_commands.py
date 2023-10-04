@@ -71,7 +71,7 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def check_bot_logs(ctx):
+async def check_logfile(ctx):
     """
     Command to export and send bot logs in CSV format to the current channel.
 
