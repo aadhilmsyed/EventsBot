@@ -8,9 +8,14 @@ from bot.logger.init import logger
 
 # Import Necessary Local Files
 from bot.logger.parser import export_logfile
+from config import export_config_to_json, import_config_from_json
 
 # Import datetime library to check latency
 import datetime
+import os
+
+# Global Variable to Store config file name
+config_file = 'data/config.json'
 
 # Function to Determine Successful Connection
 @bot.event
@@ -30,6 +35,12 @@ async def on_ready():
     
     # Update Logger with Login Information
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+    
+    # Import Configuration File if it exists
+    if os.path.exists(config_file):
+        logger.info(f"Importing Data from {config_file}...")
+        import_config_from_json(config_file)
+        logger.info("Successfully Imported Data.")
 
 
 @bot.event
@@ -51,7 +62,9 @@ async def on_disconnect():
     Returns:
         None
     """
-    logger.info('Bot Disconnecting. Exporting log data...')
-    await export_logfile()
-    logger.info('Log Data Exported.')
+    logger.info('Bot Disconnecting. Exporting Data...')
+    df = await export_logfile()
+    df.to_csv("data/log_file.csv")
+    await export_config_to_json(config_file)
+    logger.info('All Data Successfully Exported.')
 
