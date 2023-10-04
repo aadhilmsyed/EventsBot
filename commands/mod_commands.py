@@ -125,14 +125,15 @@ async def toggle_voice_channel(ctx, channel: discord.TextChannel = None):
         
         # Set the Voice Channel to the argument
         voice_channel = channel
-        logger.info("Event Voice Channel was set to {channel} by {ctx.message.author}.")
+        logger.info(f"Event Voice Channel was set to {channel} by {ctx.message.author}.")
+        await ctx.send(f"Event Voice Channel was set to {channel} by {ctx.message.author}.")
     
     except Exception as e: logger.error(e)
     
     
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def add_flight_time(ctx, member, minutes: int):
+async def add_flight_time(ctx, member: discord.Member, minutes: int):
     """
     Description:
         Adds a Specified amount of Flight Time in minutes for a Specified Member.
@@ -164,7 +165,7 @@ async def add_flight_time(ctx, member, minutes: int):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def remove_flight_time(ctx, member, minutes: int):
+async def remove_flight_time(ctx, member: discord.Member, minutes: int):
     """
     Description:
         Removes a Specified amount of Flight Time in minutes for a Specified Member.

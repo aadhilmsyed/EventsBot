@@ -19,6 +19,7 @@ from commands.mod_commands import *
 # Import the Events Module Files
 from events.flight_logs import *
 from events.send_saw import *
+from events.monthly_roles import *
 
 # Start the Bot
 logger.info('Starting the bot...')
