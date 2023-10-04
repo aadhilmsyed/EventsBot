@@ -8,11 +8,15 @@ from bot.logger.init import logger
 
 # Import Necessary Local Files
 from config import restricted_channels
+from config import flight_hours, start_time
+from config import is_event_active, voice_channel
 from bot.logger.parser import export_logfile
 
 # Import Other Necessary Libraries
 import pandas as pd
 import io
+import datetime
+from datetime import timedelta
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
@@ -96,5 +100,98 @@ async def check_bot_logs(ctx):
             await ctx.send("No log data available.")
             logger.info("Bot Logs File could not be created.")
     
-    except Exception as e:
-        logger.error(e)
+    except Exception as e: logger.error(e)
+    
+
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def toggle_voice_channel(ctx, channel: discord.TextChannel = None):
+    """
+    Description:
+        Changes/Adds/Removes the Voice Channel to Track during an Event. If no argument is specified,
+        then the voice_channel is set to None. Otherwise if a channel is passed as an argument, then
+        that voice channel is assigned to the variable
+        
+    Arguments:
+        ctx : The command object
+        channels (discord.TextChannel) : Channel to be Assigned as the Event Voice Channel
+        
+    Returns:
+        None
+    """
+    try:
+        # Declare Global Variable
+        global voice_channel
+        
+        # Set the Voice Channel to the argument
+        voice_channel = channel
+        logger.info("Event Voice Channel was set to {channel} by {ctx.message.author}.")
+    
+    except Exception as e: logger.error(e)
+    
+    
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def add_flight_time(ctx, member, minutes: int):
+    """
+    Description:
+        Adds a Specified amount of Flight Time in minutes for a Specified Member.
+        
+    Arguments:
+        ctx : The command object
+        member : The member to add flight time to
+        minutes : The amount of flight time to be added
+        
+    Return:
+        None
+    """
+    try:
+        # Declare Global Variables
+        global flight_hours
+
+        # If the member is not in the flight hours dictionary, add them
+        if member.name not in list(flight_hours.keys()):
+            flight_hours[member.name] = timedelta(minutes = minutes)
+        
+        # Otherwise add the flight hours to the member directly
+        else: flight_hours[member.name] += timedelta(minutes = minutes)
+        
+        # Send a Message to the Channel and the Logger
+        await ctx.send(f"{minutes} minutes were added to {member} by {ctx.message.author}.")
+        logger.info(f"{minutes} minutes were added to {member} by {ctx.message.author}.")
+    
+    except Exception as e: logger.error(e)
+
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def remove_flight_time(ctx, member, minutes: int):
+    """
+    Description:
+        Removes a Specified amount of Flight Time in minutes for a Specified Member.
+        
+    Arguments:
+        ctx : The command object
+        member : The member to remove flight time from
+        minutes : The amount of flight time to be removed
+        
+    Return:
+        None
+    """
+    try:
+        # Declare Global Variables
+        global flight_hours
+
+        # If the member is not in the flight hours dictionary, add them
+        if member.name not in list(flight_hours.keys()):
+            ctx.send(f"{member.name} does not have any Flight Time.")
+            logger.info(f"Could Not Remove Flight Time for {member.name}.")
+            return
+        
+        # Otherwise add the flight hours to the member directly
+        flight_hours[member.name] -= timedelta(minutes = minutes)
+        
+        # Send a Message to the Channel and the Logger
+        await ctx.send(f"{minutes} minutes were removed from {member} by {ctx.message.author}.")
+        logger.info(f"{minutes} minutes were removed from {member} by {ctx.message.author}.")
+    
+    except Exception as e: logger.error(e)
