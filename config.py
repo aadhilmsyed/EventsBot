@@ -28,6 +28,14 @@ is_event_active = False
 # Voice Channel of the Event
 voice_channel = None
 
+# Define role IDs for different tiers
+roles = { # Role ID, Hours
+    989232534313369630:  15,
+    1110680241569017966: 10,
+    1110680332879011882: 5,
+    1112981412191146004: 2,
+}
+
 # Embed Thumbnail for METAR commands
 metar_embed_thumbnail_url = "https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ="
 
