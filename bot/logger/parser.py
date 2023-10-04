@@ -16,7 +16,7 @@ async def export_logfile():
 
     # Retrieve the data from the log file
     logger.info("Retrieving Bot Logs from log_file.json...")
-    with open('log_file.json', 'r') as log_file:
+    with open('data/log_file.json', 'r') as log_file:
         for line in log_file:
             log_entry = json.loads(line)
             log_data.append(log_entry)
