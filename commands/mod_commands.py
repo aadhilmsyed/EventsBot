@@ -105,7 +105,7 @@ async def check_logfile(ctx):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def toggle_voice_channel(ctx, channel: discord.TextChannel = None):
+async def toggle_voice_channel(ctx, channel: discord.VoiceChannel = None):
     """
     Description:
         Changes/Adds/Removes the Voice Channel to Track during an Event. If no argument is specified,
