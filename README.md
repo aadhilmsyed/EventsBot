@@ -1,6 +1,6 @@
 # GeoFS Events CoPilot Discord Bot
 
-Welcome to the GeoFS Events CoPilot! This bot is designed to enhance the GeoFS Events Discord Server by providing useful features and functionality, such as airport METAR information retrieval, flight hour tracking automation, role assignment automation, and other member commands such as dotspam, flight hours leaderboards, and individual flight times.
+Welcome to the GeoFS Events CoPilot! This bot is designed to enhance the [GeoFS Events Discord Server](https://discord.gg/nCWhNgN) by providing useful features and functionality, such as airport METAR information retrieval, flight hour tracking automation, role assignment automation, and other member commands such as dotspam, flight hours leaderboards, and individual flight times.
 
 ## Table of Contents
 
@@ -57,9 +57,7 @@ For contributions, please message `the._.pickle` on Discord.
 
 ## Usage Terms
 
-This source code is provided solely for the purpose of running the GeoFS Events CoPilot Discord Bot in the context of the GeoFS Events Discord Server. Any use, reproduction, modification, or distribution of this source code for other projects or purposes is strictly prohibited.
+This source code is provided solely for the purpose of running the GeoFS Events CoPilot Discord Bot in the context of the [GeoFS Events Discord Server](https://discord.gg/nCWhNgN). Any use, reproduction, modification, or distribution of this source code for other projects or purposes is strictly prohibited.
 
 © GeoFS Flights Channel 2023. All Rights Reserved.
-
-For questions or support, join our [Discord Server](https://discord.gg/nCWhNgN).
 
