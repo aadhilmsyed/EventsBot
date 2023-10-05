@@ -43,7 +43,7 @@ async def help(ctx):
             inline = False
         )
         embed.add_field(
-            name = "!metar",
+            name = "!dotspam",
             value = "Spams a specified number of dots (1-20). If no number is specified, then it will dotspam 10 times. Example Usage: !dotspam 15",
             inline = False
         )
