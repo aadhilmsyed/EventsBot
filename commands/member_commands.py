@@ -60,10 +60,10 @@ def expected_role(minutes):
         None
     """
 
-    if   minutes > (15 * 60): return "First Class"
-    elif minutes > (10 * 60): return "Business Class"
-    elif minutes > (5  * 60): return "Premium Economy"
-    elif minutes > (2  * 60): return "Economy Class"
+    if   minutes > (8 * 60): return "First Class"
+    elif minutes > (5 * 60): return "Business Class"
+    elif minutes > (3  * 60): return "Premium Economy"
+    elif minutes > (1  * 60): return "Economy Class"
     else: return "Member"
 
 
