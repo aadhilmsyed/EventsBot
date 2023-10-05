@@ -33,8 +33,8 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
     """
     try:
         for channel in channels:
-            if channel.id not in restricted_channels:
-                restricted_channels.append(channel.id)
+            if channel not in restricted_channels:
+                restricted_channels.append(channel)
                 await ctx.send(f"{channel.mention} is now a restricted announcement channel.")
                 logger.info(f"{channel.mention} was added as a restricted announcement channel by {ctx.author}")
             else:
@@ -43,10 +43,36 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
     # Log any Errors:
     except Exception as e: logger.error(e)
         
+        
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
+    """
+    Command to remove a channel from the list of restricted announcement channels.
+
+    Parameters:
+        ctx (discord.ext.commands.Context): The context object representing the command's context.
+        *channels (discord.TextChannel): The text channels to unrestrict.
+
+    Returns:
+        None
+    """
+    try:
+        for channel in channels:
+            if channel in restricted_channels:
+                restricted_channels.remove(channel)
+                await ctx.send(f"{channel.mention} is no longer a restricted announcement channel.")
+                logger.info(f"{channel.mention} was removed as a restricted announcement channel by {ctx.author}")
+            else:
+                await ctx.send(f"{channel.mention} is not a restricted announcement channel.")
+                
+    # Log any Errors:
+    except Exception as e: logger.error(e)
+
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def view_restricted_channel(ctx):
+async def view_restricted_channels(ctx):
     """
     Command to view the list of restricted announcement channels.
 
