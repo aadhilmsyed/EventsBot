@@ -30,10 +30,10 @@ voice_channel = None
 
 # Define role IDs for different tiers
 roles = { # Role ID, Hours
-    989232534313369630: 15,
-    1110680241569017966: 10,
-    1110680332879011882: 5,
-    1112981412191146004: 2
+    989232534313369630: 8,
+    1110680241569017966: 5,
+    1110680332879011882: 3,
+    1112981412191146004: 1
 }
 
 # Embed Thumbnail for METAR commands
