@@ -1,17 +1,14 @@
 # GeoFS Events CoPilot Discord Bot
 
-Welcome to the GeoFS Events CoPilot! 
-This bot is designed to enhance the GeoFS Events Discord Server by providing useful features and functionality, such as airport METAR information retrieval, flight hour tracking automation, role assignment automation, and other member commands such as the dotspam, flight hours leaderboard, and individual flight times.
+Welcome to the GeoFS Events CoPilot! This bot is designed to enhance the GeoFS Events Discord Server by providing useful features and functionality, such as airport METAR information retrieval, flight hour tracking automation, role assignment automation, and other member commands such as dotspam, flight hours leaderboards, and individual flight times.
 
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [File Structure](#file-structure)
-5. [Configuration](#configuration)
-6. [Contributing](#contributing)
-7. [License](#license)
+2. [Key Features](#key-features)
+3. [File Structure](#file-structure)
+4. [Contributing](#contributing)
+5. [Usage Terms](#usage-terms)
 
 ## Introduction
 
@@ -25,13 +22,13 @@ Here's a glimpse of what the GeoFS Events CoPilot brings to the table:
 
 - **Flight Hour Tracking Automation**: Say goodbye to manual record-keeping. The bot automates the logging of flight hours during events, ensuring that your valuable time is not gone to waste.
 
-- **Role Assignment Automation**: Your hard-earned flight hours are rewarded with automated role assignments by a simple command issued by the server administrators.
+- **Role Assignment Automation**: Your hard-earned flight hours are rewarded with automated role assignments issued by server administrators.
 
 - **Member Commands**: Don't worry. This bot also has many commands dedicated just for the members. From dotspam to flight hours leaderboards and individual flight time tracking, this bot is designed to be compatible for public use.
 
 ## File Structure
 
-Explain the structure of your project's files and directories. This will help users navigate your codebase.
+Here's an overview of the project's file structure to help you navigate the codebase:
 
 - `events_bot.py`: The main/driver file of the program.
 - `config.py`: Contains configuration settings and global variables.
@@ -39,7 +36,7 @@ Explain the structure of your project's files and directories. This will help us
   - `metar.py`: Module for getting Airport METAR.
   - `member_commands.py`: Commands that can be issued by members.
   - `mod_commands.py`: Commands that can be issued by moderators.
-- `data` (Directory - contains sensitive information so included in .gitignore).
+- `data` (Directory - contains sensitive information, excluded in .gitignore).
 - `bot` (Directory):
   - `__init__.py`: Bot initialization file, contains bot object used by the rest of the program.
   - `events.py`: Implementation of `on_ready()` and `on_disconnect()` functions.
@@ -52,15 +49,17 @@ Explain the structure of your project's files and directories. This will help us
   - `send_saw.py`: Module that sends 'SAW' on deleted messages if not in a restricted channel.
   - `monthly_roles.py`: Module that updates roles based on each member's flight hours.
 
-
 ## Contributing
 
-We welcome contributions from the GeoFS community! Whether you're a developer interested in enhancing the bot's capabilities or a user with suggestions for improvements, we encourage you to get involved. If you are interested in contributing to this bot, please message `the._.pickle` on discord.
+We welcome contributions from the GeoFS community! Whether you're a developer interested in enhancing the bot's capabilities or a user with suggestions for improvements, we encourage you to get involved. You can contribute by creating issues, making pull requests, or following our coding style guide.
 
-## License
+For contributions, please message `the._.pickle` on Discord.
 
-The GeoFS Events CoPilot is released under the [MIT License](LICENSE). This open-source license grants you the freedom to use, modify, and distribute the bot while ensuring that proper attribution is given.
+## Usage Terms
 
-© | GeoFS Flights Channel 2023
+This source code is provided solely for the purpose of running the GeoFS Events CoPilot Discord Bot in the context of the GeoFS Events Discord Server. Any use, reproduction, modification, or distribution of this source code for other projects or purposes is strictly prohibited.
 
----
+© GeoFS Flights Channel 2023. All Rights Reserved.
+
+For questions or support, join our [Discord Server](https://discord.gg/nCWhNgN).
+
