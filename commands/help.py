@@ -8,7 +8,7 @@ from bot.logger.init import logger
 
 
 @bot.command()
-async def send_help(ctx):
+async def help(ctx):
     """
     Description
         Responds with an embed describing commands that a user can issue.
