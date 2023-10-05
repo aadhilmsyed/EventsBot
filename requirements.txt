@@ -1,0 +1,14 @@
+aiohttp
+csv
+datetime
+discord
+io
+json
+matplotlib
+math
+numpy
+os
+pandas
+pytz
+requests
+time
