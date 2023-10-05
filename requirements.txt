@@ -1,5 +1,4 @@
 aiohttp
-csv
 datetime
 discord
 io
