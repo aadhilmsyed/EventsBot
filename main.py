@@ -18,6 +18,7 @@ from config import *
 from commands.metar import *
 from commands.member_commands import *
 from commands.mod_commands import *
+from commands.help import *
 
 # Import the Events Module Files
 from events.flight_logs import *
