@@ -90,7 +90,7 @@ async def view_restricted_channels(ctx):
         channel_list = ""
         
         # Print every channel that is restricted
-        for channel_id in restricted_channels: channel_list += f"<#{channel_id}>, ")
+        for channel_id in restricted_channels: channel_list += f"<#{channel_id}>, "
         
         await ctx.send(channel_list)
                 
