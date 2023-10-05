@@ -33,8 +33,8 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
     """
     try:
         for channel in channels:
-            if channel not in restricted_channels:
-                restricted_channels.append(channel)
+            if channel.id not in restricted_channels:
+                restricted_channels.append(channel.id)
                 await ctx.send(f"{channel.mention} is now a restricted announcement channel.")
                 logger.info(f"{channel.mention} was added as a restricted announcement channel by {ctx.author}")
             else:
@@ -59,8 +59,8 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
     """
     try:
         for channel in channels:
-            if channel in restricted_channels:
-                restricted_channels.remove(channel)
+            if channel.id in restricted_channels:
+                restricted_channels.remove(channel.id)
                 await ctx.send(f"{channel.mention} is no longer a restricted announcement channel.")
                 logger.info(f"{channel.mention} was removed as a restricted announcement channel by {ctx.author}")
             else:
@@ -84,7 +84,15 @@ async def view_restricted_channels(ctx):
     """
     try:
         
-        await ctx.send(channel.mention for channel in restricted_channels)
+        # Print Header Message
+        await ctx.send(f"Restricted Channels in {ctx.guild.name}:")
+        
+        channel_list = ""
+        
+        # Print every channel that is restricted
+        for channel_id in restricted_channels: channel_list += f"<#{channel_id}>, ")
+        
+        await ctx.send(channel_list)
                 
     # Log any Errors:
     except Exception as e: logger.error(e)
