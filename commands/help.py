@@ -12,7 +12,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         super().__init__()
 
     # Override the send_help method to customize the help message
-    async def send_help(ctx):
+    async def send_help(self, ctx):
         """
         Description
             Responds with an embed describing commands that a user can issue.
