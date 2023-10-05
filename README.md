@@ -36,6 +36,7 @@ Here's an overview of the project's file structure to help you navigate the code
   - `metar.py`: Module for getting Airport METAR.
   - `member_commands.py`: Commands that can be issued by members.
   - `mod_commands.py`: Commands that can be issued by moderators.
+  - `help.py`: Contains the help module for the bot. Members can call it to view info about the bot.
 - `data` (Directory - contains sensitive information, excluded in .gitignore).
 - `bot` (Directory):
   - `__init__.py`: Bot initialization file, contains bot object used by the rest of the program.
