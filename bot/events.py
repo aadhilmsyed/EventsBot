@@ -39,7 +39,7 @@ async def on_ready():
     # Import Configuration File if it exists
     if os.path.exists(config_file):
         logger.info(f"Importing Data from {config_file}...")
-        import_config_from_json(config_file)
+        await import_config_from_json(config_file)
         logger.info("Successfully Imported Data.")
 
 
