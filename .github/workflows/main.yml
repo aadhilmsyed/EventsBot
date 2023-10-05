@@ -1,0 +1,27 @@
+name: Test Events CoPilot
+
+on:
+  push:
+    branches:
+      - main  # Replace with your main branch name
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install -r tests/requirements.txt  # Install test dependencies
+
+    - name: Run tests
+      run: python -m unittest discover tests/test_events_bot.py
