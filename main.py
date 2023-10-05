@@ -1,3 +1,7 @@
+# Get the Token from the OS environment
+import os
+TOKEN = os.environ['DISCORD_TOKEN']
+
 # Import Discord Python Libraries
 import discord
 from discord.ext import commands
@@ -8,7 +12,6 @@ from bot.events import *
 from bot.logger.init import logger
 
 # Import the Data Module File
-from data.token import TOKEN
 from config import *
 
 # Import the Command Module Files
