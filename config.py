@@ -12,73 +12,67 @@ import csv
 import pandas as pd
 
 
-# Function to import configuration from a JSON file
-async def import_config_from_json(filename):
-    """
-    Descrptions:
-        Imports data from JSON file when bot reconnecst
-    
-    Arguments:
-        filename (str) : Name of the Import File
-    
-    Returns:
-        None
-    """
-    try:
-    
-        # Declare Global Variables
-        global restricted_channels, flight_hours, start_time
-        
-        # Print Logger Message
-        logger.info(f"Importing Data from {filename}...")
-        
-        # Open the JSON File and Read the Data from it
-        with open(filename, 'r') as json_file:
-            data = json.load(json_file)
-            restricted_channels = data.get("restricted_channels", [])
-            flight_hours = data.get("flight_hours", {})
-            start_time = data.get("start_time", {})
-            
-        # Print Logger Message
-        logger.info("Imported Data Successfully.")
-    
-    except Exception as e: logger.error(e)
-
-
-async def export_config_to_json(filename):
-    """
-    Descrptions:
-        Exports data to a JSON file when bot disconnects
-    
-    Arguments:
-        filename (str) : Name of the Export File
-    
-    Returns:
-        None
-    """
-    try:
-    
-        # Declare Global Variables
-        global restricted_channels, flight_hours, start_time
-        
-        # Data to be Exported
-        data = {
-            "restricted_channels": restricted_channels,
-            "flight_hours": flight_hours,
-            "start_time": start_time
-        }
-        
-        # Print Logger Message
-        logger.info(f"Exporting Data to {filename}...")
-        
-        # Open the JSON file and write the data to it
-        with open(filename, 'w') as json_file:
-            json.dump(data, json_file)
-            
-        # Print Logger Message
-        logger.info("Exported Data Successfully.")
-    
-    except Exception as e: logger.error(e)
+## Function to import configuration from a JSON file
+#async def import_config_from_json(filename):
+#    """
+#    Descrptions:
+#        Imports data from JSON file when bot reconnecst
+#
+#    Arguments:
+#        filename (str) : Name of the Import File
+#
+#    Returns:
+#        None
+#    """
+#    try:
+#
+#        # Print Logger Message
+#        logger.info(f"Importing Data from {filename}...")
+#
+#        # Open the JSON File and Read the Data from it
+#        with open(filename, 'r') as json_file:
+#            data = json.load(json_file)
+#            restricted_channels = data.get("restricted_channels", [])
+#            flight_hours = data.get("flight_hours", {})
+#            start_time = data.get("start_time", {})
+#
+#        # Print Logger Message
+#        logger.info("Imported Data Successfully.")
+#
+#    except Exception as e: logger.error(e)
+#
+#
+#async def export_config_to_json(filename):
+#    """
+#    Descrptions:
+#        Exports data to a JSON file when bot disconnects
+#
+#    Arguments:
+#        filename (str) : Name of the Export File
+#
+#    Returns:
+#        None
+#    """
+#    try:
+#
+#        # Data to be Exported
+#        data = {
+#            "restricted_channels": restricted_channels,
+#            "flight_hours": flight_hours,
+#            "start_time": start_time
+#        }
+#
+#        # Print Logger Message
+#        logger.info(f"Exporting Data to {filename}...")
+#
+#        # Open the JSON file and write the data to it
+#        with open(filename, 'w') as json_file:
+#            json.dump(data, json_file)
+#
+#        # Print Logger Message
+#        logger.info("Exported Data Successfully.")
+#
+#    except Exception as e: logger.error(e)
 
 
 async def import_flight_hours(file_path = 'data/flight_hours.csv'):

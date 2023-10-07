@@ -122,6 +122,9 @@ async def view_restricted_channels(ctx):
         # Send the list to the channel of the command context
         if channel_list: await ctx.send(channel_list)
                 
+        # Export the updated restricted channels
+        await export_restricted_channels(restricted_channels)
+                
     # Log any Errors:
     except Exception as e: logger.error(e)
 
