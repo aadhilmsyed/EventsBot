@@ -266,7 +266,7 @@ async def import_event_status(file_path = 'data/event_status.txt'):
     # If no File is Found, then Create One
     except FileNotFoundError:
         with open(file_path, 'w') as file: logger.info(f'{file_path} was created')
-        return []
+        return False, None
     
     # Log any Errors
     except Exception as e: logger.error(e); return []
