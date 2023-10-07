@@ -204,3 +204,23 @@ async def ping(ctx):
     # Send the latency as a message
     await ctx.send(f'Pong! Latency is {latency} ms')
 
+@bot.command()
+async def quack(ctx):
+    """
+    Description
+        Responds with a duck whenever the quack command is called
+
+    Parameters:
+        ctx (discord.ext.commands.Context): The context object representing the command's context.
+
+    Returns:
+        None
+    """
+    
+    logger.info(f"'quack' command was issued by {ctx.author}")
+    
+    # Calculate the latency (ping)
+    try: ctx.send(':duck:')
+    
+    # Log any Errors
+    except Exception as e: logger.error(e)
