@@ -6,6 +6,9 @@ from discord.ext import commands
 from bot.init import bot
 from bot.logger.init import logger
 
+# Import other Necessary Libraries
+from random import randrange as randomnumber
+
 # Import Restricted Channels List from admin_commands
 from config import restricted_channels
 
@@ -25,8 +28,9 @@ async def send_saw(channel, author):
     if channel.id in restricted_channels: return
     
     # Print SAW and self-delete after 5 seconds
-    await channel.send("SAW")
-    logger.info(f"'SAW' was sent to {channel} after message delete by {author}.")
+    if randomnumber(1,4) == 2:
+        await channel.send("SAW")
+        logger.info(f"'SAW' was sent to {channel} after message delete by {author}.")
     
 @bot.event
 async def on_message_delete(message):
