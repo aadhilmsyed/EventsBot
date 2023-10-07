@@ -7,15 +7,13 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Necessary Local Files
-from bot.logger.parser import export_logfile
-from config import export_config_to_json, import_config_from_json
+from config import import_start_times, export_start_times
+from config import import_event_status, export_event_status
+from events.flight_logs import log_vc_members, update_flight_hours
 
 # Import datetime library to check latency
 import datetime
 import os
-
-# Global Variable to Store config file name
-config_file = 'data/config.json'
 
 # Function to Determine Successful Connection
 @bot.event
@@ -32,15 +30,20 @@ async def on_ready():
     Returns:
         None
     """
+    try:
     
-    # Update Logger with Login Information
-    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
-    
-    # Import Configuration File if it exists
-    if os.path.exists(config_file):
-        logger.info(f"Importing Data from {config_file}...")
-        await import_config_from_json(config_file)
-        logger.info("Successfully Imported Data.")
+        # Update Logger with Login Information
+        logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+        
+        # Import Configuration File if it exists
+        is_event_active, voice_channel = await import_event_status()
+        
+        # If there is an event ongoing, start logging it
+        if is_event_active:
+            logger.info("Ongoing Event Detected. Starting Logging...")
+            log_vc_members(voice_channel)
+            
+    except Exception as e: logger.error(e)
 
 
 @bot.event
@@ -62,9 +65,10 @@ async def on_disconnect():
     Returns:
         None
     """
-    logger.info('Bot Disconnecting. Exporting Data...')
-    df = await export_logfile()
-    df.to_csv("data/log_file.csv")
-    await export_config_to_json(config_file)
-    logger.info('All Data Successfully Exported.')
+    try:
 
+        # If there is an event ongoing, save the current logged flight time
+        logger.info("Bot Disconnecting. Saving Flight Hours...")
+        update_flight_hours()
+    
+    except Exception as e: logger.error(e)

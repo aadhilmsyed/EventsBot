@@ -7,14 +7,8 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Necessary Local Files
-from config import flight_hours
+from config import import_flight_hours, export_flight_hours
     
-def calculate_hours(flight_time):
-    
-    hours, remainder = divmod(flight_time, 3600)
-    minutes, _ = divmod(remainder, 60)
-    
-    return hours, minutes
     
 @bot.command()
 async def dotspam(ctx, limit: int = 10):
@@ -66,6 +60,14 @@ def expected_role(minutes):
     else: return "Member"
 
 
+def calculate_hours(flight_time):
+    
+    hours, remainder = divmod(flight_time, 3600)
+    minutes, _ = divmod(remainder, 60)
+    
+    return hours, minutes
+
+
 @bot.command()
 async def flighttime(ctx):
     """
@@ -82,10 +84,9 @@ async def flighttime(ctx):
     logger.info(f"'flighttime' command was issued by {ctx.message.author}...")
     
     try:
-        # Declare Global Variable
-        global flight_hours
-        flight_time = flight_hours.copy()
-        logger.info(f"Flight Hours has a total of {len(flight_time)} members.")
+        
+        # Import the Flight Hours from File
+        flight_hours = await import_flight_hours()
         
         # Retrieve the message author as the member name
         member = ctx.message.author
@@ -135,9 +136,9 @@ async def leaderboard(ctx):
     logger.info(f"'leaderboard' command was issued by {ctx.author}")
     
     try:
-        # Declare Global Variable
-        global flight_hours
-        flight_time = flight_hours.copy()
+    
+        # Import the Flight Hours
+        flight_hours = await import_flight_hours()
     
         # Sort the Dictionary by Highest flight hours
         logger.info("Sorting Leaderboard...")
@@ -204,3 +205,18 @@ async def ping(ctx):
     # Send the latency as a message
     await ctx.send(f'Pong! Latency is {latency} ms')
 
+
+@bot.command()
+async def quack(ctx):
+    """
+    Description
+        Sends a duck to the channel whenever someone calls the quack command
+
+    Parameters:
+        ctx (discord.ext.commands.Context): The context object representing the command's context.
+
+    Returns:
+        None
+    """
+    try: await ctx.send(":duck:")
+    except Exception as e: logger.error(e)

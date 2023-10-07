@@ -12,10 +12,6 @@ import requests
 import time
 import math
 
-# Import Necessary Local Files
-from config import metar_embed_thumbnail_url
-#from data.keys import unsplash_api_key
-
 @bot.command()
 async def metar(ctx, icao_code : str):
     """
@@ -77,12 +73,12 @@ async def metar(ctx, icao_code : str):
         embed.add_field(name = "Raw METAR", value = f"{metar_data['rawOb']}")
 
         # Add airport picture as the thumbnail
-        global metar_embed_thumbnail_url
+        # Embed Thumbnail for METAR commands
+        metar_embed_thumbnail_url = "https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ="
         embed.set_thumbnail(url = metar_embed_thumbnail_url)
 
         # Set Embed Footer
-        text = "Data Provided by Aviation Weather Center API.\nImage Provided by Unsplash API."
-        embed.set_footer(text = text)
+        embed.set_footer(text = "Data Provided by Aviation Weather Center API.")
 
         await ctx.send(embed = embed)
     

@@ -8,18 +8,15 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Necessary Local Files
-from config import flight_hours, start_time
-from config import voice_channel, is_event_active
+from config import import_flight_hours, export_flight_hours
+from config import import_start_times, export_start_times
+from config import import_event_status, export_event_status
 
 # Import Other Necessary Libraries
 from datetime import datetime as time
 import pytz
-
-# Declare Global Variables
-global is_event_active
-global voice_channel
-global flight_hours
-global start_time
+import pandas as pd
+import os
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -38,38 +35,38 @@ async def on_voice_state_update(member, before, after):
         None
     """
     try:
-    
-        # Declare Global Variables
-        global is_event_active
-        global voice_channel
-        global flight_hours
-        global start_time
+        
+        # Import the Necessary Data
+        flight_hours = await import_flight_hours()
+        start_times =  await import_start_times()
+        is_event_active, voice_channel = await import_event_status()
 
         # Exit the Function if there is no Ongoing Event
         if not is_event_active: return
 
         # If the User has joined the vc, start their timer
         if after.channel == voice_channel:
-            start_time[member.name] = time.now(pytz.utc)
+            start_times[member.name] = time.now(pytz.utc)
             logger.info(f"{member} Joined the Event. Starting Logging...")
             
         # If the User left the vc, then stop their timer and add it to flight logs
         if before.channel == voice_channel:
         
             # Check if the user was previously tracked
-            if member.name not in start_time: return
+            if member.name not in start_times: return
             
-            # Calculate the flight time and add it to the member's flight hours
-            elapsed_time = time.now(pytz.utc) - start_time[member.name]
-            if member.name not in flight_hours: flight_hours[member.name] = elapsed_time
-            else: flight_hours[member.name] += elapsed_time
-            logger.info(f"{member.name} Left the Event. Logging Complete ({elapsed_time}).")
-            logger.info(f"{member.name} Total Flight Hours - {flight_hours[member.name]}.")
-            logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
+            # Log Flight Hours for the Left Member
+            await log_left_member(member.name)
             
             # Remove the user from the tracking dictionary
-            del start_time[member.name]
+            del start_times[member.name]
+            
+        # Export the Necessary Data
+        await export_flight_hours(flight_hours)
+        await export_start_times(start_times)
+        await export_event_status(is_event_active, voice_channel)
     
+    # Log any Errors
     except Exception as e: logger.error(e)
     
     
@@ -90,11 +87,8 @@ async def on_scheduled_event_update(before, after):
     """
     try:
         
-        # Declare Global Variables
-        global is_event_active
-        global voice_channel
-        global flight_hours
-        global start_time
+        # Import the Necessary Data
+        is_event_active, voice_channel = await import_event_status()
 
         # Set Event Active Status to True if Event is Active
         if after.status == EventStatus.active:
@@ -114,36 +108,43 @@ async def on_scheduled_event_update(before, after):
             # Update Flight Hours
             update_flight_hours()
             
+        # Export the Necessary Data
+        await export_event_status(is_event_active, voice_channel)
+          
+    # Log any Errors
     except Exception as e: logger.error(e)
     
 
-def log_vc_members(channel):
+async def log_vc_members(channel):
     """
     Description:
         This helper function logs any members who may have already been in the vc prior
         to the start of the event to avoid any edge cases.
     
     Arguments:
-        channel : The voice channel that the members are in
+        channel (discord.VoiceChannel) : The voice channel that the members are in
         
     Returns:
         None
     """
     try:
         
-        # Declare Global Variables
-        global flight_hours
-        global start_time
+        # Import the Necessary Data
+        start_times =  await import_start_times()
 
         # Start the Flight Logger For every member in the channel
         for member in channel.members:
-            start_time[member.name] = time.now(pytz.utc)
+            start_times[member.name] = time.now(pytz.utc)
             logger.info(f"{member} Joined the Event. Starting Logging...")
+            
+        # Export the Necessary Data
+        await export_start_times(start_times)
     
+    # Log any Errors
     except Exception as e: logger.error(e)
     
     
-def update_flight_hours():
+async def update_flight_hours():
     """
     Description:
         This helper function calculates and updates the flight hours of the remaining
@@ -157,22 +158,49 @@ def update_flight_hours():
     """
     try:
     
-        # Declare Global Variables
-        global flight_hours
-        global start_time
+        # Import the Necessary Data
+        flight_hours = await import_flight_hours()
+        start_times =  await import_start_times()
     
         # For every member who joined the event
-        for member_name in list(start_time.keys()):
+        for member_name in list(start_times.keys()):
         
-            # Increment their flight hours with the elapsed time
-            elapsed_time = time.now(pytz.utc) - start_time[member_name]
-            if member_name not in flight_hours: flight_hours[member_name] = elapsed_time
-            else: flight_hours[member_name] += elapsed_time
-            logger.info(f"{member_name} Left the Event. Logging Complete ({elapsed_time}).")
-            logger.info(f"{member_name} Total Flight Hours - {flight_hours[member_name]}.")
-            logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
+            # Log Flight Hours for the Member
+            log_left_member(member_name)
             
             # Delete that member instance from start times
-            del start_time[member_name]
+            del start_times[member_name]
+            
+        # Export the Necessary Data
+        await export_flight_hours(flight_hours)
+        await export_start_times(start_times)
         
+    # Log any Errors
+    except Exception as e: logger.error(e)
+
+
+async def log_left_member(member_name):
+    """
+    Description:
+        This helper function calculates and updates the flight hours of the remaining
+        members who joined the event in case the event ends before they leave.
+    
+    Arguments:
+        member_name (str) : Name of the Member to Log Flight Hours for
+        
+    Returns:
+        None
+    """
+    try:
+        
+        # Calculate the flight time and add it to the member's flight hours
+        elapsed_time = time.now(pytz.utc) - start_times[member_name]
+        if member_name not in flight_hours: flight_hours[member_name] = elapsed_time
+        else: flight_hours[member_name] += elapsed_time
+        
+        # Update Logger Information
+        logger.info(f"{member_name} Left the Event. Logging Complete ({elapsed_time}).")
+        logger.info(f"{member_name} Total Flight Hours - {flight_hours[member_name]}.")
+    
+    # Log any Errors
     except Exception as e: logger.error(e)

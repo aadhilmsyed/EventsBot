@@ -6,7 +6,6 @@ from discord.ext import commands
 from bot.init import bot
 from bot.logger.init import logger
 
-
 @bot.command()
 async def help(ctx):
     """

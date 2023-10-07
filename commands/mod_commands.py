@@ -7,10 +7,12 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import Necessary Local Files
-from config import restricted_channels
-from config import flight_hours, start_time
-from config import is_event_active, voice_channel
+from config import import_restricted_channels, export_restricted_channels
+from config import import_flight_hours, export_flight_hours
+from config import import_start_times, export_start_times
+from config import import_event_status, export_event_status
 from bot.logger.parser import export_logfile
+from events.flight_logs import log_vc_members
 
 # Import Other Necessary Libraries
 import pandas as pd
@@ -22,7 +24,7 @@ from datetime import timedelta
 @commands.has_permissions(manage_channels=True)
 async def add_restricted_channel(ctx, *channels: discord.TextChannel):
     """
-    Command to add a channel to the list of restricted announcement channels.
+    Command to add a channel to the list of restricted channels.
 
     Parameters:
         ctx (discord.ext.commands.Context): The context object representing the command's context.
@@ -32,14 +34,25 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
         None
     """
     try:
+    
+        # Import the Restricted Channels List
+        restricted_channels = await import_restricted_channels()
+    
+        # For every channel in the argument
         for channel in channels:
+        
+            # Add the channel to the list if its not already there
             if channel.id not in restricted_channels:
                 restricted_channels.append(channel.id)
-                await ctx.send(f"{channel.mention} is now a restricted announcement channel.")
-                logger.info(f"{channel.mention} was added as a restricted announcement channel by {ctx.author}")
-            else:
-                await ctx.send(f"{channel.mention} is already a restricted announcement channel.")
+                await ctx.send(f"{channel.mention} is now a restricted channel.")
+                logger.info(f"{channel.mention} was added as a restricted channel by {ctx.author}")
+            
+            # Otherwise inform the user that channel is already restricted
+            else: await ctx.send(f"{channel.mention} is already a restricted channel.")
                 
+        # Export the updated restricted channels
+        await export_restricted_channels(restricted_channels)
+        
     # Log any Errors:
     except Exception as e: logger.error(e)
         
@@ -48,7 +61,7 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
 @commands.has_permissions(manage_channels=True)
 async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
     """
-    Command to remove a channel from the list of restricted announcement channels.
+    Command to remove a channel from the list of restricted channels.
 
     Parameters:
         ctx (discord.ext.commands.Context): The context object representing the command's context.
@@ -58,13 +71,24 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
         None
     """
     try:
+    
+        # Import the Restricted Channels List
+        restricted_channels = await import_restricted_channels()
+    
+        # For every channel in the argument
         for channel in channels:
+        
+            # Add the Channel to the list if its not already there
             if channel.id in restricted_channels:
                 restricted_channels.remove(channel.id)
-                await ctx.send(f"{channel.mention} is no longer a restricted announcement channel.")
-                logger.info(f"{channel.mention} was removed as a restricted announcement channel by {ctx.author}")
-            else:
-                await ctx.send(f"{channel.mention} is not a restricted announcement channel.")
+                await ctx.send(f"{channel.mention} is no longer a restricted channel.")
+                logger.info(f"{channel.mention} was removed as a restricted channel by {ctx.author}")
+                
+            # Otherwise inform the caller that channel is already unrestricted
+            else: await ctx.send(f"{channel.mention} is not a restricted channel.")
+                
+        # Export the updated restricted channels
+        await export_restricted_channels(restricted_channels)
                 
     # Log any Errors:
     except Exception as e: logger.error(e)
@@ -74,7 +98,7 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
 @commands.has_permissions(manage_channels=True)
 async def view_restricted_channels(ctx):
     """
-    Command to view the list of restricted announcement channels.
+    Command to view the list of restricted channels.
 
     Parameters:
         ctx (discord.ext.commands.Context): The context object representing the command's context.
@@ -83,6 +107,9 @@ async def view_restricted_channels(ctx):
         None
     """
     try:
+    
+        # Import the Restricted Channels List
+        restricted_channels = await import_restricted_channels()
         
         # Print Header Message
         await ctx.send(f"Restricted Channels in {ctx.guild.name}:")
@@ -92,7 +119,8 @@ async def view_restricted_channels(ctx):
         # Print every channel that is restricted
         for channel_id in restricted_channels: channel_list += f"<#{channel_id}>, "
         
-        await ctx.send(channel_list)
+        # Send the list to the channel of the command context
+        if channel_list: await ctx.send(channel_list)
                 
     # Log any Errors:
     except Exception as e: logger.error(e)
@@ -149,13 +177,17 @@ async def toggle_voice_channel(ctx, channel: discord.VoiceChannel = None):
         None
     """
     try:
-        # Declare Global Variable
-        global voice_channel
+        
+        # Import the Voice Channel variable
+        is_event_active, voice_channel = await import_event_status()
         
         # Set the Voice Channel to the argument
         voice_channel = channel
         logger.info(f"Event Voice Channel was set to {channel} by {ctx.message.author}.")
         await ctx.send(f"Event Voice Channel was set to {channel} by {ctx.message.author}.")
+    
+        # Export the new Voice Channel
+        await export_event_status(is_event_active, voice_channel)
     
     except Exception as e: logger.error(e)
     
@@ -176,8 +208,9 @@ async def add_flight_time(ctx, member: discord.Member, minutes: int):
         None
     """
     try:
-        # Declare Global Variables
-        global flight_hours
+        
+        # Import the Flight Hours from Memory
+        flight_hours = await import_flight_hours()
 
         # If the member is not in the flight hours dictionary, add them
         if member.name not in list(flight_hours.keys()):
@@ -189,6 +222,9 @@ async def add_flight_time(ctx, member: discord.Member, minutes: int):
         # Send a Message to the Channel and the Logger
         await ctx.send(f"{minutes} minutes were added to {member} by {ctx.message.author}.")
         logger.info(f"{minutes} minutes were added to {member} by {ctx.message.author}.")
+        
+        # Export the updated Flight Hours
+        await export_flight_hours(flight_hours)
     
     except Exception as e: logger.error(e)
 
@@ -208,8 +244,9 @@ async def remove_flight_time(ctx, member: discord.Member, minutes: int):
         None
     """
     try:
-        # Declare Global Variables
-        global flight_hours
+    
+        # Import the Flight Hours from Memory
+        flight_hours = await import_flight_hours()
 
         # If the member is not in the flight hours dictionary, add them
         if member.name not in list(flight_hours.keys()):
@@ -223,5 +260,8 @@ async def remove_flight_time(ctx, member: discord.Member, minutes: int):
         # Send a Message to the Channel and the Logger
         await ctx.send(f"{minutes} minutes were removed from {member} by {ctx.message.author}.")
         logger.info(f"{minutes} minutes were removed from {member} by {ctx.message.author}.")
+    
+        # Export the updated Flight Hours
+        await export_flight_hours(flight_hours)
     
     except Exception as e: logger.error(e)

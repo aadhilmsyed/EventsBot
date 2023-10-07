@@ -7,7 +7,7 @@ from bot.init import bot
 from bot.logger.init import logger
 
 # Import from Local Files
-from config import flight_hours, roles
+from config import import_flight_hours, export_flight_hours
 
 # Import Other Necessary Libraries
 import datetime
@@ -29,9 +29,17 @@ async def assign_roles(ctx, member : discord.Member):
         None
     """
     try:
-        # Declare Global Variables
-        global flight_hours
-        global roles
+        
+        # Define the Role Thresholds
+        roles = { # Role ID, Hours
+            989232534313369630: 8,
+            1110680241569017966: 5,
+            1110680332879011882: 3,
+            1112981412191146004: 1
+        }
+        
+        # Import the Necessary Data
+        flight_hours = await import_flight_hours()
         
         # If the Member is not a bot, assign the 'Member' role; else assign 'Bot'
         if not member.bot: await member.add_roles(discord.utils.get(member.guild.roles, id = 844635858501500988)) # TODO: Change to GE Member Role
@@ -57,6 +65,9 @@ async def assign_roles(ctx, member : discord.Member):
                 logger.info(f"{member.name} was assigned {role} during role updates.")
 #                await ctx.send(f"{member.name} was assigned {role}.")
                 break      # Prevents Multiple Role Assignments
+                
+        # Export the Necessary Data
+        await export_flight_hours(flight_hours)
                 
     except Exception as e: logger.error(e)
 
@@ -108,10 +119,10 @@ async def clear_flight_logs(ctx):
     Returns:
         None
     """
-    
     try:
-        # Declare Global Variables
-        global flight_hours
+    
+        # Import the Necessary Data
+        flight_hours = await import_flight_hours()
         
         # Export the Flight Logs to a JSON File in case we need to reload
 #        filename = 'data/flight_logs.json'
@@ -127,6 +138,9 @@ async def clear_flight_logs(ctx):
         
         # Check the Length of the Flight Logs to ensure full reset
         logger.info(f"flight_hours has a total of {len(flight_hours)} entries.")
+        
+        # Export the Necessary Data
+        await export_flight_hours(flight_hours)
     
     # Log any Errors
     except Exception as e: logger.error(e)
