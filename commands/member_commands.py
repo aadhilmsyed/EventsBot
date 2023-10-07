@@ -61,10 +61,22 @@ def expected_role(minutes):
 
 
 def calculate_hours(flight_time):
+    """
+    Description
+        Returns the hours and minutes of flight time given the total seconds
+
+    Parameters:
+        flight_time (int) : Flight Time in seconds
+
+    Returns:
+        None
+    """
     
+    # Convert Seconds to Hours and Minutes using Modulo
     hours, remainder = divmod(flight_time, 3600)
     minutes, _ = divmod(remainder, 60)
     
+    # Return the hours and minutes
     return hours, minutes
 
 
@@ -98,10 +110,10 @@ async def flighttime(ctx):
         hours, minutes = 0, 0
         
         # Check if the member has flight hours recorded
-        if member_name in list(flight_time.keys()):
+        if member_name in list(flight_hours.keys()):
         
             # Calculate the flight time in hours & minutes
-            hours, minutes = calculate_hours(flight_time[member_name].total_seconds())
+            hours, minutes = calculate_hours(flight_hours[member_name].total_seconds())
             logger.info(f"Flight Time Information for {member_name} was found ({int(hours)} h {int(minutes)} m)")
             
         else: logger.info(f"Flight Time Information for {member_name} was not found")
@@ -142,7 +154,7 @@ async def leaderboard(ctx):
     
         # Sort the Dictionary by Highest flight hours
         logger.info("Sorting Leaderboard...")
-        sorted_flight_hours = dict(sorted(flight_time.items(), key=lambda item: item[1], reverse=True))
+        sorted_flight_hours = dict(sorted(flight_hours.items(), key=lambda item: item[1], reverse=True))
 
         # Convert the sorted dictionary items into a list of tuples
         sorted_items = list(sorted_flight_hours.items())

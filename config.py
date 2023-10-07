@@ -189,7 +189,7 @@ async def export_start_times(start_times, file_path = 'data/start_times.csv'):
     except Exception as e: logger.error(e)
 
 
-async def import_restricted_channels(file_path='data/restricted_channels.txt'):
+async def import_restricted_channels(file_path = 'data/restricted_channels.txt'):
     """
     Descrptions:
         Imports restricted channels data from the txt File
