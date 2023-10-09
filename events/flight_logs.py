@@ -59,16 +59,8 @@ async def on_voice_state_update(member, before, after):
             # Check if the user was previously tracked
             if member.name not in start_time: return
             
-            # Calculate the flight time and add it to the member's flight hours
-            elapsed_time = time.now(pytz.utc) - start_time[member.name]
-            if member.name not in flight_hours: flight_hours[member.name] = elapsed_time
-            else: flight_hours[member.name] += elapsed_time
-            logger.info(f"{member.name} Left the Event. Logging Complete ({elapsed_time}).")
-            logger.info(f"{member.name} Total Flight Hours - {flight_hours[member.name]}.")
-            logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
-            
-            # Remove the user from the tracking dictionary
-            del start_time[member.name]
+            # Log the Flight Hours of the Member who left VC
+            log_left_member(member.name)
     
     except Exception as e: logger.error(e)
     
@@ -161,18 +153,41 @@ def update_flight_hours():
         global flight_hours
         global start_time
     
-        # For every member who joined the event
-        for member_name in list(start_time.keys()):
+        # For every member who joined the event, log the flight time for that member
+        for member_name in list(start_time.keys()): log_left_member(member_name)
         
-            # Increment their flight hours with the elapsed time
-            elapsed_time = time.now(pytz.utc) - start_time[member_name]
-            if member_name not in flight_hours: flight_hours[member_name] = elapsed_time
-            else: flight_hours[member_name] += elapsed_time
-            logger.info(f"{member_name} Left the Event. Logging Complete ({elapsed_time}).")
-            logger.info(f"{member_name} Total Flight Hours - {flight_hours[member_name]}.")
-            logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
-            
-            # Delete that member instance from start times
-            del start_time[member_name]
+    except Exception as e: logger.error(e)
+
+
+def log_left_member(member_name):
+    """
+    Descrption:
+        This helper function logs any members who have left the voice channel or if an event
+        has eneded. This function will calculate the amount of time the member has been in
+        the voice channel and it will update their flight hours accordingly.
         
+    Arguments:
+        member_name (str) : Name of member - key to access flight hours and start times
+        
+    Returns:
+        None
+    """
+    try:
+    
+        # Calculate the Elapsed Time of the Member in VC
+        elapsed_time = time.now(pytz.utc) - start_time[member_name]
+        
+        # Add the Elapsed Time to the Member's Flight Hours
+        if member_name not in flight_hours: flight_hours[member_name] = elapsed_time
+        else: flight_hours[member_name] += elapsed_time
+        
+        # Update Logger Information
+        logger.info(f"{member_name} Left the Event. Logging Complete ({elapsed_time}).")
+        logger.info(f"{member_name} Total Flight Hours - {flight_hours[member_name]}.")
+        logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
+        
+        # Delete that member instance from start times
+        del start_time[member_name]
+    
+    # Log any Errors
     except Exception as e: logger.error(e)
