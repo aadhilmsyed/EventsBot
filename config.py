@@ -41,6 +41,8 @@ roles = { # Role ID, Hours
     1112981412191146004: 1
 }
 
+guild_id = 553718744233541656
+
 # Embed Thumbnail for METAR commands
 metar_embed_thumbnail_url = "https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ="
 
@@ -179,7 +181,7 @@ async def export_bot_data():
         
             # Write the is_event_active and voice channel data to the file
             file.write(f"{str(is_event_active).lower()}\n")
-            file.write(f"{voice_channel.id}")
+            file.write(f"{voice_channel.id if voice_channel else '0'}")
 
         # Update Logger Information
         logger.info("Successfully Exported Event Status.")
@@ -202,7 +204,7 @@ async def import_bot_data():
     try:
     
         # Declare global variables
-        global flight_hours, start_time, restricted_channels, is_event_active, voice_channel
+        global flight_hours, start_time, restricted_channels, is_event_active, voice_channel, guild_id
 
         # Import Data for the Flight Hours
         flight_hours = {}
@@ -250,7 +252,8 @@ async def import_bot_data():
                 is_event_active_str = file.readline().strip().lower()
                 is_event_active = is_event_active_str == 'true'
                 voice_channel_id = int(file.readline().strip())
-                voice_channel = bot.get_guild(553718744233541656).get_channel(voice_channel_id)
+                if voice_channel_id != 0:
+                    voice_channel = bot.get_guild(guild_id).get_channel(voice_channel_id)
                 logger.info("Successfully Imported Event Status.")
         else: logger.info("data/event_status.txt could not be found.")
             
