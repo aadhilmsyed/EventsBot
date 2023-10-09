@@ -1,6 +1,6 @@
 # Get the Token from the OS environment
-#import os
-#TOKEN = os.environ['DISCORD_TOKEN']
+import os
+TOKEN = os.environ['DISCORD_TOKEN']
 
 # Import Discord Python Libraries
 import discord
@@ -13,7 +13,7 @@ from bot.logger.init import logger
 
 # Import the Data Module File
 from config import *
-from data.token import TOKEN
+#from data.token import TOKEN
 
 # Import the Command Module Files
 from commands.metar import *
