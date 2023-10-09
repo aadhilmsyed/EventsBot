@@ -71,6 +71,7 @@ async def on_disconnect():
     """
     
     # Export Data to the Data Files
+    logger.info("Bot Disconnecting. Attempting to Export Data...")
     await export_bot_data()
 
 
