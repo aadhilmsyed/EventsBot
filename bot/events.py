@@ -1,5 +1,6 @@
 # Import Discord Python Libaries
 import discord
+from discord.enums import EventStatus
 from discord.ext import commands
 
 # Import the Bot & Logger Objects
@@ -10,6 +11,8 @@ from bot.logger.init import logger
 from bot.logger.parser import export_logfile
 #from config import export_config_to_json, import_config_from_json
 from config import export_bot_data, import_bot_data
+from config import is_event_active
+from events.flight_logs import log_vc_members
 
 # Import datetime library to check latency
 import datetime
@@ -35,12 +38,21 @@ async def on_ready():
         None
     """
     
+    # Declare global variable
+    global is_event_active, guild
+    
     # Update Logger with Login Information
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
     
     # Import Bot Data from Files if it exists
     logger.info("Attempting to Retrieve Data from Data Files...")
     await import_bot_data()
+    
+    # If there is an active event, then start logging
+    if is_event_active:
+        for event in guild.scheduled_events:
+            if event.status == EventStatus.active:
+                log_vc_members(event.channel)
     
 
 
