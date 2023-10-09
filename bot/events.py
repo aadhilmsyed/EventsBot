@@ -40,7 +40,7 @@ async def on_ready():
     
     # Import Bot Data from Files if it exists
     logger.info("Attempting to Retrieve Data from Data Files...")
-    import_bot_data()
+    await import_bot_data()
     
 
 
@@ -59,5 +59,38 @@ async def on_disconnect():
     """
     
     # Export Data to the Data Files
-    export_bot_data()
+    await export_bot_data()
 
+
+def log_left_member(member_name):
+    """
+    Descrption:
+        This helper function logs any members who have left the voice channel or if an event
+        has eneded. This function will calculate the amount of time the member has been in
+        the voice channel and it will update their flight hours accordingly.
+        
+    Arguments:
+        member_name (str) : Name of member - key to access flight hours and start times
+        
+    Returns:
+        None
+    """
+    try:
+    
+        # Calculate the Elapsed Time of the Member in VC
+        elapsed_time = time.now(pytz.utc) - start_time[member_name]
+        
+        # Add the Elapsed Time to the Member's Flight Hours
+        if member_name not in flight_hours: flight_hours[member_name] = elapsed_time
+        else: flight_hours[member_name] += elapsed_time
+        
+        # Update Logger Information
+        logger.info(f"{member_name} Left the Event. Logging Complete ({elapsed_time}).")
+        logger.info(f"{member_name} Total Flight Hours - {flight_hours[member_name]}.")
+        logger.info(f"flight_hours now has a total of {len(flight_hours)} members.")
+        
+        # Delete that member instance from start times
+        del start_time[member_name]
+    
+    # Log any Errors
+    except Exception as e: logger.error(e)
