@@ -220,7 +220,7 @@ async def quack(ctx):
     logger.info(f"'quack' command was issued by {ctx.author}")
     
     # Calculate the latency (ping)
-    try: ctx.send(':duck:')
+    try: await ctx.send(':duck:')
     
     # Log any Errors
     except Exception as e: logger.error(e)
