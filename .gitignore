@@ -1,5 +1,4 @@
 data/*.py
 data/*.json
-data/*.txt
 data/*.csv
 log_file.json
