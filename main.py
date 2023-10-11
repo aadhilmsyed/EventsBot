@@ -4,7 +4,7 @@ TOKEN = os.environ['DISCORD_TOKEN']
 
 # Import Discord Python Libraries
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 # Import the Bot Module Files
 from bot.init import bot
@@ -26,6 +26,6 @@ from events.flight_logs import *
 from events.send_saw import *
 from events.monthly_roles import *
 
-# Start the Bot
+# Start the Bot & the Ping Task
 logger.info('Starting the bot...')
 bot.run(TOKEN)

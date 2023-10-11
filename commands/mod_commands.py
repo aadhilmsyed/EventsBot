@@ -124,7 +124,7 @@ async def check_logfile(ctx):
                 filename="bot_logs.csv",
                 fp=io.StringIO(csv_data)  # Use io.StringIO here
             ))
-            logger.info("Bot Logs File was sent to {ctx.channel}")
+            logger.info(f"Bot Logs File was sent to {ctx.channel}")
         else:
             await ctx.send("No log data available.")
             logger.info("Bot Logs File could not be created.")

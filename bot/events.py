@@ -1,7 +1,7 @@
 # Import Discord Python Libaries
 import discord
 from discord.enums import EventStatus
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 # Import the Bot & Logger Objects
 from bot.init import bot
@@ -13,6 +13,7 @@ from bot.logger.parser import export_logfile
 from config import export_bot_data, import_bot_data
 from config import is_event_active
 from events.flight_logs import log_vc_members
+from commands.member_commands import ping
 
 # Import datetime library to check latency
 import datetime
@@ -43,6 +44,10 @@ async def on_ready():
     
     # Update Logger with Login Information
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
+    
+    # Start the Ping Task Loop
+    logger.info("Starting the Ping Task Loop...")
+    ping_task.start()
     
     # Import Bot Data from Files if it exists
     logger.info("Attempting to Retrieve Data from Data Files...")
@@ -107,3 +112,8 @@ def log_left_member(member_name):
     
     # Log any Errors
     except Exception as e: logger.error(e)
+    
+# Define a task that sends the ping command every 5 minutes
+@tasks.loop(seconds = 300)
+async def ping_task():
+    logger.info(f"Ping Task Loop was called after 5 minutes.")
