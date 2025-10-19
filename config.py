@@ -117,7 +117,7 @@ class Configurations:
             self.economy_class_role_id: 1
         }
         
-    def save(self, file_path="data/config/bot_settings.json"):
+    def save(self, file_path="/data/config/bot_settings.json"):
         """Save configuration with atomic write and backup"""
         data = {
             "restricted_channels": self.restricted_channels,
@@ -144,7 +144,7 @@ class Configurations:
                 os.unlink(temp_path)
             raise e
         
-    def load(self, file_path="data/config/bot_settings.json"):
+    def load(self, file_path="/data/config/bot_settings.json"):
         if os.path.exists(file_path):
             with open(file_path, "r") as file:
                 data = json.load(file)
@@ -249,7 +249,7 @@ class FlightHours:
                 
             else: return 0 # Extra layer of protection
 
-    def save(self, file_path="data/flight_hours/current.json"):
+    def save(self, file_path="/data/flight_hours/current.json"):
         """Save flight hours with atomic write and backup"""
         with self._lock:
             # Convert non-parseable data types to parseable data types
@@ -288,7 +288,7 @@ class FlightHours:
                     os.unlink(temp_path)
                 raise e
         
-    def load(self, file_path="data/flight_hours/current.json"):
+    def load(self, file_path="/data/flight_hours/current.json"):
         """Load flight hours with error handling and backup recovery"""
         if os.path.exists(file_path):
             try:
@@ -340,11 +340,11 @@ class FlightHours:
                     self.member_history = {}
                     self.event_history = OrderedDict()
     
-    def create_backup(self, file_path="data/flight_hours/current.json"):
+    def create_backup(self, file_path="/data/flight_hours/current.json"):
         """Create a timestamped backup of flight hours data"""
         if os.path.exists(file_path):
             timestamp = time.now(pytz.utc).strftime("%Y%m%d_%H%M%S")
-            backup_path = f"data/backups/flight_hours_backup_{timestamp}.json"
+            backup_path = f"/data/backups/flight_hours_backup_{timestamp}.json"
             
             # Ensure backup directory exists
             os.makedirs(os.path.dirname(backup_path), exist_ok=True)

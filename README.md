@@ -58,7 +58,7 @@ Here's an overview of the project's file structure to help you navigate the code
 - `validation.py`: Input validation and sanitization utilities.
 
 ### Data Directory
-- `data/`: Organized data storage structure:
+- `/data/`: Organized data storage structure:
   - `config/`: Bot configuration files
   - `flight_hours/`: Flight hour data and backups
   - `events/`: Event history and attendance

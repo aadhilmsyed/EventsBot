@@ -178,7 +178,7 @@ async def update_roles(ctx):
         await logger.info("Role Updates Complete. Now Exporting Flight Hours...")
         
         # Send the exported file to the log channel
-        file_path = "data/logs/role_updates.txt"
+        file_path = "/data/logs/role_updates.txt"
         await flight_hours_manager.export(file_path)
         with open(file_path, "rb") as file: 
             await config.log_channel.send(file=discord.File(file, file_path))
