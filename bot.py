@@ -30,8 +30,8 @@ async def on_ready():
     """
     
     # Update Logger with Login Information
-    config.guild = bot.get_guild(553718744233541656)
-    config.log_channel = config.guild.get_channel(1184292134258479176)
+    config.guild = bot.get_guild(config.guild_id)
+    config.log_channel = config.guild.get_channel(config.log_channel_id)
     await logger.setChannel(config.log_channel)
     await logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
     
@@ -63,5 +63,21 @@ async def on_ready():
             break
             
 @bot.event
-async def on_command_error(ctx, error): await logger.error(f"{error} {ctx.message.jump_url}")
+async def on_command_error(ctx, error): 
+    await logger.error(f"{error} {ctx.message.jump_url}")
+
+@bot.event
+async def on_disconnect():
+    """Handle bot disconnection"""
+    await logger.error("Bot disconnected from Discord. Attempting to reconnect...")
+
+@bot.event
+async def on_resume():
+    """Handle bot reconnection"""
+    await logger.info("Bot reconnected to Discord successfully.")
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    """Handle general bot errors"""
+    await logger.error(f"An error occurred in event {event}: {args} {kwargs}")
 

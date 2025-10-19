@@ -11,9 +11,11 @@ import aiohttp
 import requests
 import time
 import math
+import os
 
 # Import Necessary Local Files
 from config import config
+from validation import validate_icao_code
 
 @bot.command()
 async def metar(ctx, icao_code: str):
@@ -28,17 +30,15 @@ async def metar(ctx, icao_code: str):
         None
     """
     try:
-        # Perform Input Validation on the ICAO Airport Code
-        if not icao_code.isalnum() or not (len(icao_code) == 4):
-            await ctx.send("Invalid ICAO code format. It must 4 alphanumeric characters.")
-            return
+        # Validate ICAO code input
+        validated_icao = validate_icao_code(icao_code)
 
         # Get the METAR data from the API
-        metar_data = await get_metar_info(icao_code)
+        metar_data = await get_metar_info(validated_icao)
 
         # Send Error Message and Exit Function if No Information was Retrieved
         if metar_data is None:
-            await ctx.send(f"Unable to retrieve METAR info for {icao_code}")
+            await ctx.send(f"Unable to retrieve METAR info for {validated_icao}")
             return
 
         # Create an embed
@@ -71,7 +71,8 @@ async def metar(ctx, icao_code: str):
         embed.add_field(name="Raw METAR", value=f"{metar_data['rawOb']}")
 
         # Add airport picture as the thumbnail
-        embed.set_thumbnail(url="https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ=")
+        weather_thumbnail_url = os.getenv('WEATHER_THUMBNAIL_URL', 'https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ=')
+        embed.set_thumbnail(url=weather_thumbnail_url)
 
         # Set Embed Footer
         text = "Data Provided by Aviation Weather Center API."
@@ -79,7 +80,11 @@ async def metar(ctx, icao_code: str):
 
         await ctx.send(embed=embed)
 
-    except Exception as e: await logger.error(f"An error occurred in metar command: {e}")
+    except ValueError as e:
+        await ctx.send(f"Invalid ICAO code: {e}")
+        await logger.error(f"Invalid ICAO code in metar command: {e}")
+    except Exception as e: 
+        await logger.error(f"An error occurred in metar command: {e}")
 
     
 async def get_metar_info(icao_code: str):
@@ -98,21 +103,33 @@ async def get_metar_info(icao_code: str):
         requests.RequestException: If there is an issue with the HTTP request.
     """
     # API URL for METAR info
-    api_url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={icao_code}&format=json"
+    metar_base_url = os.getenv('METAR_API_BASE_URL', 'https://aviationweather.gov/cgi-bin/data/metar.php')
+    api_url = f"{metar_base_url}?ids={icao_code}&format=json"
     
     try:
-        # Send a GET request to the API
-        response = requests.get(api_url)
+        # Send a GET request to the API with timeout
+        response = requests.get(api_url, timeout=10)
 
         # Return the response if the request was successful
-        if response.status_code == 200: return response.json()[0]
+        if response.status_code == 200: 
+            data = response.json()
+            return data[0] if data else None
         
         # If the request was unsuccessful, return nothing
         else: return None
 
     # Log any Errors
+    except requests.exceptions.Timeout:
+        await logger.error(f"Timeout occurred while fetching METAR data for {icao_code}")
+        return None
+    except requests.exceptions.RequestException as e:
+        await logger.error(f"Request error occurred in get_metar_info: {e}")
+        return None
+    except (ValueError, KeyError, IndexError) as e:
+        await logger.error(f"JSON parsing error in get_metar_info: {e}")
+        return None
     except Exception as e:
-        await logger.error(f"An error occurred in get_metar_info: {e}")
+        await logger.error(f"An unexpected error occurred in get_metar_info: {e}")
         return None
 
 @bot.command()
@@ -162,11 +179,12 @@ async def get_atis_info(icao_code: str):
         requests.RequestException: If there is an issue with the HTTP request.
     """
     # API URL for ATIS info
-    api_url = f"https://datis.clowd.io/api/{icao_code}"
+    atis_base_url = os.getenv('ATIS_API_BASE_URL', 'https://datis.clowd.io/api')
+    api_url = f"{atis_base_url}/{icao_code}"
     
     try:
-        # Send a GET request to the API
-        response = requests.get(api_url)
+        # Send a GET request to the API with timeout
+        response = requests.get(api_url, timeout=10)
 
         # Return the response if the request was successful
         if response.status_code == 200:
@@ -178,6 +196,15 @@ async def get_atis_info(icao_code: str):
             return None
 
     # Log any Errors
+    except requests.exceptions.Timeout:
+        await logger.error(f"Timeout occurred while fetching ATIS data for {icao_code}")
+        return None
+    except requests.exceptions.RequestException as e:
+        await logger.error(f"Request error occurred in get_atis_info: {e}")
+        return None
+    except (ValueError, KeyError, IndexError) as e:
+        await logger.error(f"JSON parsing error in get_atis_info: {e}")
+        return None
     except Exception as e:
-        await logger.error(f"An error occurred in get_atis_info: {e}")
+        await logger.error(f"An unexpected error occurred in get_atis_info: {e}")
         return None

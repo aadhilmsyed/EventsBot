@@ -26,29 +26,47 @@ Here's a glimpse of what the GeoFS Events CoPilot brings to the table:
 
 - **Member Commands**: Don't worry. This bot also has many commands dedicated just for the members. From dotspam to flight hours leaderboards and individual flight time tracking, this bot is designed to be compatible for public use.
 
+- **Staff Management Tools**: Comprehensive moderation and administration commands for First Officers and Captains, including channel management, member blacklisting, and flight time management.
+
+- **Server Booster Support**: Special privileges for server boosters with role-based command access and enhanced permissions.
+
+- **Role-Based Command System**: Tiered command access based on flight hours and server roles (Economy Class, Premium Economy, Business Class, First Class).
+
+- **Comprehensive Help System**: Separate help commands for members (`!help`), First Officers (`!mod_help`), and Captains (`!admin_help`).
+
 ## File Structure
 
 Here's an overview of the project's file structure to help you navigate the codebase:
 
-- `events_bot.py`: The main/driver file of the program.
-- `config.py`: Contains configuration settings and global variables.
-- `commands` (Directory):
-  - `metar.py`: Module for getting Airport METAR.
-  - `member_commands.py`: Commands that can be issued by members.
-  - `mod_commands.py`: Commands that can be issued by moderators.
-  - `help.py`: Contains the help module for the bot. Members can call it to view info about the bot.
-- `data` (Directory - contains sensitive information, excluded in .gitignore).
-- `bot` (Directory):
-  - `__init__.py`: Bot initialization file, contains bot object used by the rest of the program.
-  - `events.py`: Implementation of `on_ready()` and `on_disconnect()` functions.
-  - `logger` (Sub-directory):
-    - `__init__.py`: Logger initialization file, contains logger object used by the rest of the program.
-    - `formatter.py`: Module used to convert logger information into JSON format.
-    - `parser.py`: Parses JSON file to CSV for exporting.
-- `events` (Directory):
-  - `flight_logs.py`: Contains module for automatically logging flight hours during events.
-  - `send_saw.py`: Module that sends 'SAW' on deleted messages if not in a restricted channel.
-  - `monthly_roles.py`: Module that updates roles based on each member's flight hours.
+### Core Files
+- `main.py`: The main entry point of the program.
+- `bot.py`: Bot initialization and core event handlers.
+- `config.py`: Configuration management and data persistence with environment variable support.
+- `logger.py`: Logging functionality for Discord channels.
+
+### Command Modules
+- `help.py`: Help system with member, moderator, and admin help commands.
+- `member_commands.py`: Commands available to all members with role-based restrictions.
+- `mod_commands.py`: Commands for First Officers and Captains.
+- `metar.py`: Weather information commands (METAR/ATIS).
+- `monthly_roles.py`: Role management and flight hour calculations.
+
+### Event Handling
+- `flight_logs.py`: Automatic flight hour logging during events.
+
+### Utilities
+- `validation.py`: Input validation and sanitization utilities.
+
+### Data Directory
+- `data/`: Organized data storage structure:
+  - `config/`: Bot configuration files
+  - `flight_hours/`: Flight hour data and backups
+  - `events/`: Event history and attendance
+  - `logs/`: System logs and role update history
+
+### Documentation
+- `STAFF_COMMANDS.md`: Comprehensive staff command documentation.
+- `requirements.txt`: Python dependencies.
 
 ## Contributing
 

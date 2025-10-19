@@ -8,6 +8,7 @@ from logger import logger
 
 # Import Necessary Local Files
 from config import config, flight_hours_manager
+from validation import sanitize_event_name, validate_flight_time, validate_member_id
 
 # Import Other Necessary Libraries
 import pandas as pd
@@ -16,7 +17,7 @@ import datetime
 from datetime import timedelta
 
 @bot.command()
-async def add_restricted_channel(ctx, *channels: discord.TextChannel):
+async def restrict(ctx, *channels: discord.TextChannel):
     """
     Command to add a channel to the list of restricted announcement channels.
 
@@ -28,9 +29,11 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
         None
     """
     
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # For each channel to be added
     for channel in channels:
@@ -49,7 +52,7 @@ async def add_restricted_channel(ctx, *channels: discord.TextChannel):
         
         
 @bot.command()
-async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
+async def unrestrict(ctx, *channels: discord.TextChannel):
     """
     Command to remove a channel from the list of restricted announcement channels.
 
@@ -60,9 +63,11 @@ async def remove_restricted_channel(ctx, *channels: discord.TextChannel):
     Returns:
         None
     """
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # For each channel to be removed
     for channel in channels:
@@ -92,9 +97,11 @@ async def view_restricted_channels(ctx):
         None
     """
     
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # If there are no restricted channels, send a message
     if not config.restricted_channels: await ctx.send(f"There are no restricted channels in {ctx.guild.name}")
@@ -119,8 +126,8 @@ async def add_event_vc(ctx, channel: discord.VoiceChannel = None):
         None
     """
     
-    # Verify that the member is an Event Manager
-    manager_role = config.guild.get_role(948366879980937297)
+    # Verify that the member is a first officer
+    manager_role = config.guild.get_role(config.first_officer_role_id)
     if manager_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if there is an active event
@@ -138,8 +145,12 @@ async def add_event_vc(ctx, channel: discord.VoiceChannel = None):
     
     # Log any members who might be in the event voice channel
     for member in channel.members:
+        if member.bot:
+            continue  # Skip bots
         await logger.info(f"{member.mention} joined {channel.mention}. Starting Logging...")
-        flight_hours_manager.log_start_time(str(member.id))
+        success = flight_hours_manager.log_start_time(member.id, member)
+        if not success:
+            continue  # Bot was filtered out
         
     # Save the updated flight hours to the file
     flight_hours_manager.save()
@@ -159,8 +170,8 @@ async def remove_event_vc(ctx, channel: discord.VoiceChannel = None):
         None
     """
     
-    # Verify that the member is an Event Manager
-    manager_role = config.guild.get_role(948366879980937297)
+    # Verify that the member is a first officer
+    manager_role = config.guild.get_role(config.first_officer_role_id)
     if manager_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if there is an active event
@@ -177,7 +188,11 @@ async def remove_event_vc(ctx, channel: discord.VoiceChannel = None):
     
     # Log any members who might be in the event voice channel
     for member in channel.members:
-        elapsed_minutes = flight_hours_manager.log_end_time(str(member.id))
+        if member.bot:
+            continue  # Skip bots
+        elapsed_minutes = flight_hours_manager.log_end_time(member.id, member)
+        if elapsed_minutes == 0:
+            continue  # Bot was filtered out or no time logged
         await logger.info(f"{member.mention} left {channel.mention}. Ending Logging...")
         await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to {member.mention}. " \
                           f"{member.mention} has a total flight time of {int(flight_hours_manager.flight_hours[str(member.id)])} minutes.")
@@ -199,8 +214,8 @@ async def view_event_vc(ctx):
         None
     """
     
-    # Verify that the member is an Event Manager
-    manager_role = config.guild.get_role(948366879980937297)
+    # Verify that the member is a first officer
+    manager_role = config.guild.get_role(config.first_officer_role_id)
     if manager_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if there is an active event
@@ -230,22 +245,42 @@ async def add_flight_time(ctx, member: discord.Member, minutes: int):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
-    # If the member is not in the flight hours dictionary, create an entry
-    if str(member.id) not in flight_hours_manager.flight_hours.keys(): flight_hours_manager.flight_hours[str(member.id)] = 0
+    # Check if the target member is a bot
+    if member.bot:
+        await ctx.send("Cannot add flight time to bots.")
+        return
     
-    # Add the flight hours to the member
-    flight_hours_manager.flight_hours[str(member.id)] += minutes
-    
-    # Send a Message to the Channel and the Logger
-    await ctx.send(f"{minutes} minutes of flight time were added to {member.mention}.")
-    await logger.info(f"{minutes} minutes were added to {member.mention} by {ctx.message.author.mention}.")
-    
-    # Save the updated flight hours back to the file
-    flight_hours_manager.save()
+    try:
+        # Validate input
+        validated_minutes = validate_flight_time(minutes)
+        validated_member_id = validate_member_id(member.id)
+        
+        # If the member is not in the flight hours dictionary, create an entry
+        if validated_member_id not in flight_hours_manager.flight_hours.keys(): 
+            flight_hours_manager.flight_hours[validated_member_id] = 0
+        
+        # Add the flight hours to the member
+        flight_hours_manager.flight_hours[validated_member_id] += validated_minutes
+        
+        # Send a Message to the Channel and the Logger
+        await ctx.send(f"{validated_minutes} minutes of flight time were added to {member.mention}.")
+        await logger.info(f"{validated_minutes} minutes were added to {member.mention} by {ctx.message.author.mention}.")
+        
+        # Save the updated flight hours back to the file
+        flight_hours_manager.save()
+        
+    except ValueError as e:
+        await ctx.send(f"Invalid input: {e}")
+        await logger.error(f"Invalid input in add_flight_time: {e}")
+    except Exception as e:
+        await ctx.send("An error occurred while adding flight time.")
+        await logger.error(f"An error occurred in add_flight_time: {e}")
     
 
 @bot.command()
@@ -263,9 +298,16 @@ async def remove_flight_time(ctx, member: discord.Member, minutes: int):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
+    
+    # Check if the target member is a bot
+    if member.bot:
+        await ctx.send("Cannot remove flight time from bots.")
+        return
     
     # If the member is not in the flight hours dictionary, create an entry
     if str(member.id) not in flight_hours_manager.flight_hours.keys():
@@ -316,9 +358,11 @@ async def add_event_attendance(ctx, member: discord.Member, *, event_name: str):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the event exists
     if event_name not in flight_hours_manager.event_history.keys(): await ctx.send(f"Event '{event_name}' could not be found in the database"); return
@@ -354,9 +398,11 @@ async def remove_event_attendance(ctx, member: discord.Member, *, event_name: st
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the event exists
     if event_name not in flight_hours_manager.event_history.keys(): await ctx.send(f"Event '{event_name}' could not be found in the database"); return
@@ -391,9 +437,11 @@ async def view_event_attendance(ctx, *, event_name: str):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the event exists
     if event_name not in flight_hours_manager.event_history.keys(): await ctx.send(f"Event '{event_name}' could not be found in the database"); return
@@ -410,9 +458,9 @@ async def view_event_attendance(ctx, *, event_name: str):
 
 
 @bot.command()
-async def add_blacklist_member(ctx, member: discord.Member):
+async def blacklist(ctx, member: discord.Member):
     """
-    Adds a member to the member blacklist, preventing access to commands like !copilotsays and !spam
+    Adds a member to the member blacklist, preventing access to commands like !echo and !spam
 
     Parameters:
         ctx (discord.ext.commands.Context): The context object representing the command's context.
@@ -422,9 +470,11 @@ async def add_blacklist_member(ctx, member: discord.Member):
         None
     """
     
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the member is already in the blacklist
     if str(member.id) in config.blacklist: await ctx.send(f"{member.mention} is already on the blacklist."); return
@@ -441,21 +491,23 @@ async def add_blacklist_member(ctx, member: discord.Member):
         
         
 @bot.command()
-async def remove_blacklist_member(ctx, member: discord.Member):
+async def whitelist(ctx, member: discord.Member):
     """
-    Removes a member from the member blacklist, re-enabling access to commands like !copilotsays and !spam
+    Removes a member from the member blacklist, re-enabling access to commands like !echo and !spam
 
     Parameters:
         ctx (discord.ext.commands.Context): The context object representing the command's context.
-        member (discord.Member) : The member to add to the blacklist
+        member (discord.Member) : The member to remove from the blacklist
 
     Returns:
         None
     """
     
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the member is already in the blacklist
     if str(member.id) not in config.blacklist: await ctx.send(f"{member.mention} is not on the blacklist."); return
@@ -471,7 +523,7 @@ async def remove_blacklist_member(ctx, member: discord.Member):
     config.save()
 
 @bot.command()
-async def view_blacklist_members(ctx):
+async def view_blacklist(ctx):
     """
     A list of all the members on the blacklist
     
@@ -482,9 +534,11 @@ async def view_blacklist_members(ctx):
         None
     """
     
-    # Verify that the member is a moderator
-    moderator_role = config.guild.get_role(766386531681435678)
-    if moderator_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a first officer or captain
+    first_officer_role = config.guild.get_role(config.first_officer_role_id)
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if first_officer_role not in ctx.message.author.roles and captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # If there are no restricted channels, send a message
     if not config.blacklist: await ctx.send("There are currently no members on the blacklist"); return
@@ -508,19 +562,32 @@ async def add_event(ctx, *, event_name: str):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a captain
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
-    # Check if the event already exists in the event history
-    if event_name in flight_hours_manager.event_history.keys(): await ctx.send("This event already exists in the event history."); return
-    
-    # Add the event to the event history
-    flight_hours_manager.event_history[event_name] = set()
-    await ctx.send(f"Event '{event_name}' was successfully added to the event history database.")
-    
-    # Export the updated data back to the file
-    flight_hours_manager.save(); return
+    try:
+        # Validate and sanitize event name
+        sanitized_event_name = sanitize_event_name(event_name)
+        
+        # Check if the event already exists in the event history
+        if sanitized_event_name in flight_hours_manager.event_history.keys(): 
+            await ctx.send("This event already exists in the event history."); return
+        
+        # Add the event to the event history
+        flight_hours_manager.event_history[sanitized_event_name] = set()
+        await ctx.send(f"Event '{sanitized_event_name}' was successfully added to the event history database.")
+        
+        # Export the updated data back to the file
+        flight_hours_manager.save(); return
+        
+    except ValueError as e:
+        await ctx.send(f"Invalid event name: {e}")
+        await logger.error(f"Invalid event name in add_event: {e}")
+    except Exception as e:
+        await ctx.send("An error occurred while adding the event.")
+        await logger.error(f"An error occurred in add_event: {e}")
     
     
 @bot.command()
@@ -536,9 +603,10 @@ async def remove_event(ctx, *, event_name: str):
         None
     """
     
-    # Check if the message author is an executive
-    executive_role = config.guild.get_role(1316559380782645278)
-    if executive_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Check if the message author is a captain
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if the event already exists in the event history
     if event_name not in flight_hours_manager.event_history.keys(): await ctx.send("This event is not in the event history."); return
@@ -568,12 +636,13 @@ async def start_event(ctx, *, event_name: str):
         None
     """
     
-    # Verify that the member is an Event Manager
-    manager_role = config.guild.get_role(948366879980937297)
-    if manager_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
+    # Verify that the member is a captain
+    captain_role = config.guild.get_role(config.captain_role_id)
+    if captain_role not in ctx.message.author.roles: 
+        await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if there is a current active event
-    if flight_hours_manager.active_event: await ctx.send("There is already an ongoing event. You cannot start another event.")
+    if flight_hours_manager.active_event: await ctx.send("There is already an ongoing event. You cannot start another event."); return
     
     # Check that the event does not already exist in the database
     if event_name in flight_hours_manager.event_history.keys(): await ctx.send("An event with this name already exists. Please select a different name."); return
@@ -603,8 +672,8 @@ async def end_event(ctx):
         None
     """
     
-    # Verify that the member is an Event Manager
-    manager_role = config.guild.get_role(948366879980937297)
+    # Verify that the member is a first officer
+    manager_role = config.guild.get_role(config.first_officer_role_id)
     if manager_role not in ctx.message.author.roles: await ctx.send("Your role is not high enough to use this command."); return
     
     # Check if there is a current active event
@@ -619,9 +688,10 @@ async def end_event(ctx):
         # Update the logger information to the log channel
 #        member = config.guild.get_member(int(member_id))
 #        vc_channel = member.voice.channel.mention if member.voice else "the event"
-        await logger.info(f"<#{member_id}> left the event. Ending Logging...")
+        await logger.info(f"<@{member_id}> left the event. Ending Logging...")
+        total_flight_time = flight_hours_manager.flight_hours.get(str(member_id), 0)
         await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to <@{member_id}>. " \
-                          f"<#{member_id}> has a total flight time of {int(flight_hours_manager.flight_hours[str(member_id)])} minutes.")
+                          f"<@{member_id}> has a total flight time of {int(total_flight_time)} minutes.")
         
     # Update logger information to the log channel
     event_name = flight_hours_manager.active_event

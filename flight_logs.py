@@ -53,7 +53,9 @@ async def on_voice_state_update(member, before, after):
         if member.bot: return
         
         # Log the start time for the member
-        flight_hours_manager.log_start_time(str(member.id))
+        success = flight_hours_manager.log_start_time(member.id, member)
+        if not success:
+            return  # Bot was filtered out, don't log
         
         # Update Information to the Logger
         await logger.info(f"{member.mention} joined <#{after.channel.id}>. Starting Logging...")
@@ -68,12 +70,15 @@ async def on_voice_state_update(member, before, after):
         if member.bot: return
         
         # Log the left member and get the elapsed time
-        elapsed_minutes = flight_hours_manager.log_end_time(str(member.id))
+        elapsed_minutes = flight_hours_manager.log_end_time(member.id, member)
+        if elapsed_minutes == 0 and member.bot:
+            return  # Bot was filtered out, don't log
         
         # Update the logger information to the log channel
-        await logger.info(f"{member.mention} left <#{before.channel}>. Ending Logging...")
+        await logger.info(f"{member.mention} left <#{before.channel.id}>. Ending Logging...")
+        total_flight_time = flight_hours_manager.flight_hours.get(str(member.id), 0)
         await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to {member.mention}. " \
-                          f"{member.mention} has a total flight time of {int(flight_hours_manager.flight_hours[str(member.id)])} minutes.")
+                          f"{member.mention} has a total flight time of {int(total_flight_time)} minutes.")
                           
         # Export the updated data back to the file
         flight_hours_manager.save(); return
@@ -110,7 +115,9 @@ async def on_scheduled_event_update(before, after):
         if after.channel:
             for member in after.channel.members:
                 if member.bot: continue
-                flight_hours_manager.log_start_time(member.id)
+                success = flight_hours_manager.log_start_time(member.id, member)
+                if not success:
+                    continue  # Bot was filtered out, skip logging
                 await logger.info(f"{member.mention} joined {after.channel.mention}. Starting Logging...")
 
         # Export the updated data back to the file
@@ -122,15 +129,22 @@ async def on_scheduled_event_update(before, after):
         # End the Logging for all members who joined the event
         for member_id in list(flight_hours_manager.start_time.keys()):
             
+            # Get member object first to check if it's a bot
+            member = config.guild.get_member(int(member_id))
+            if not member or member.bot:
+                continue  # Skip bots or non-existent members
+            
             # Log the left member and get the elapsed time
-            elapsed_minutes = flight_hours_manager.log_end_time(str(member_id))
+            elapsed_minutes = flight_hours_manager.log_end_time(member_id, member)
+            if elapsed_minutes == 0:
+                continue  # No time logged (shouldn't happen for valid members)
             
             # Update the logger information to the log channel
-            member = config.guild.get_member(int(member_id))
             if not member.voice: continue
             await logger.info(f"<@{member_id}> left {member.voice.channel.mention}. Ending Logging...")
+            total_flight_time = flight_hours_manager.flight_hours.get(str(member_id), 0)
             await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to <@{member_id}>. " \
-                              f"<@{member_id}> has a total flight time of {int(flight_hours_manager.flight_hours[str(member_id)])} minutes.")
+                              f"<@{member_id}> has a total flight time of {int(total_flight_time)} minutes.")
             
         # Update logger information to the log channel
         await logger.info(f"Ending Logging for Event '{before.name}'. A total of {len(flight_hours_manager.event_history[before.name])} members joined.")

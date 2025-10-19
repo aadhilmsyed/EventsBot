@@ -11,8 +11,11 @@ from config import config, flight_hours_manager
 
 # Import Other External Libraries
 from random import randrange
+from discord.ext import commands
+import time
     
 @bot.command()
+@commands.cooldown(1, 5, commands.BucketType.user)  # 5 second cooldown per user
 async def dotspam(ctx, limit: int = 10):
     """
     Description:
@@ -25,6 +28,30 @@ async def dotspam(ctx, limit: int = 10):
     Returns:
         None
     """
+
+    # Check if the message author is on the blacklist
+    if str(ctx.message.author.id) in config.blacklist: await ctx.send("You have been blacklisted from using this command."); return
+    
+    # Check if user is moderator (can use freely)
+    moderator_role = config.guild.get_role(config.moderator_role_id)
+    is_moderator = moderator_role in ctx.message.author.roles
+    
+    # Check if user is server booster
+    server_booster_role = config.guild.get_role(config.server_booster_role_id)
+    is_booster = server_booster_role in ctx.message.author.roles
+    
+    # Check if user has required role (Premium Economy or above)
+    premium_economy = config.guild.get_role(config.premium_economy_role_id)
+    business_class = config.guild.get_role(config.business_class_role_id)
+    first_class = config.guild.get_role(config.first_class_role_id)
+    has_required_role = (premium_economy in ctx.message.author.roles or 
+                        business_class in ctx.message.author.roles or 
+                        first_class in ctx.message.author.roles)
+    
+    # Allow if moderator, booster, or has required role
+    if not (is_moderator or is_booster or has_required_role):
+        await ctx.send("This command is accessible only to Premium Economy+, server boosters, or moderators."); return
+    
     try:
         # Convert the Argument to Integer, throw Error if not an integer
         limit = int(limit)
@@ -40,6 +67,8 @@ async def dotspam(ctx, limit: int = 10):
         for _ in range(limit): await ctx.send(".")
     
     except ValueError: await ctx.send("Please enter an integer value between 1 and 15.")
+    except commands.CommandOnCooldown as e:
+        await ctx.send(f"This command is on cooldown. Try again in {e.retry_after:.1f} seconds.")
     except Exception as e: await logger.error(f"An error occurred in dotspam: {e}")
 
     
@@ -63,6 +92,7 @@ def expected_role(minutes):
 
 
 @bot.command()
+@commands.cooldown(1, 3, commands.BucketType.user)  # 3 second cooldown per user
 async def flighttime(ctx, member: discord.Member = None):
     """
     Description
@@ -79,12 +109,23 @@ async def flighttime(ctx, member: discord.Member = None):
         
         # Retrieve the message author as the member name
         if member is None: member = ctx.message.author
-        highest_role = max(member.roles, key=lambda role: role.position)
-        embed_color = highest_role.color
+        
+        # Check if the member is a bot
+        if member.bot:
+            await ctx.send("Bots don't have flight time.")
+            return
+        
+        # Check if member has roles to avoid errors
+        if not member.roles:
+            embed_color = discord.Color.default()
+        else:
+            highest_role = max(member.roles, key=lambda role: role.position)
+            embed_color = highest_role.color
         
         # Check if the member has flight hours recorded
         hours, minutes = 0, 0
-        if str(member.id) in flight_time.keys(): hours, minutes = divmod(flight_time[str(member.id)], 60)
+        if str(member.id) in flight_time.keys(): 
+            hours, minutes = divmod(flight_time[str(member.id)], 60)
         
         # Format flight hours as a string
         flight_time_str = f"{int(hours)} hours {int(minutes)} minutes"
@@ -93,14 +134,24 @@ async def flighttime(ctx, member: discord.Member = None):
         embed = discord.Embed(title=f"Flight Time for {member.display_name}", color=embed_color)
         embed.add_field(name="Current Flight Hours", value=flight_time_str)
         embed.add_field(name="Expected Role", value=expected_role((hours * 60 + minutes)))
-        embed.set_thumbnail(url = member.avatar.url if member.avatar else "https://sm.mashable.com/mashable_me/seo/default/discord_4r4y.jpg")
+        
+        # Safely get avatar URL
+        try:
+            avatar_url = member.avatar.url if member.avatar else "https://sm.mashable.com/mashable_me/seo/default/discord_4r4y.jpg"
+        except:
+            avatar_url = "https://sm.mashable.com/mashable_me/seo/default/discord_4r4y.jpg"
+        
+        embed.set_thumbnail(url=avatar_url)
         
         await ctx.send(embed=embed)
         
-    except Exception as e: await logger.error(f"An error occurred in flighttime: {e}")
+    except Exception as e: 
+        await logger.error(f"An error occurred in flighttime: {e}")
+        await ctx.send("An error occurred while retrieving flight time. Please try again later.")
     
 
 @bot.command()
+@commands.cooldown(1, 10, commands.BucketType.user)  # 10 second cooldown per user
 async def leaderboard(ctx):
     """
     Description
@@ -147,8 +198,13 @@ async def leaderboard(ctx):
             flight_time_str = f"{int(hours)} hours {int(minutes)} minutes"
             
             # Add the Information to the Embed
-            member = await bot.fetch_user(member_id)
-            embed.add_field(name=f"#{i}: {member.name}", value=flight_time_str, inline=False)
+            try:
+                member = await bot.fetch_user(member_id)
+                member_name = member.name if member else f"Unknown User ({member_id})"
+            except:
+                member_name = f"Unknown User ({member_id})"
+            
+            embed.add_field(name=f"#{i}: {member_name}", value=flight_time_str, inline=False)
         
         # Send the Embed
         await ctx.send(embed=embed)
@@ -172,7 +228,7 @@ async def on_message_delete(message):
     if message.channel.id in config.restricted_channels: return
     
     # if the message is a bot command, then ignore
-    if message.content.split(" ")[0] == "!copilotsays": return
+    if message.content.split(" ")[0] == "!echo": return
     
     # Otherwise send "SAW" for every one in three messages
     try:
@@ -202,6 +258,7 @@ async def on_reaction_remove(reaction, user):
     except Exception as e: await logger.error(f"An error occurred in on_reaction_add: {e}")
 
 @bot.command()
+@commands.cooldown(1, 2, commands.BucketType.user)  # 2 second cooldown per user
 async def ping(ctx):
     """
     Description
@@ -235,7 +292,8 @@ async def quack(ctx):
     except Exception as e: await logger.error(f"An error occurred in quack command: {e}")
     
 @bot.command()
-async def copilotsays(ctx, *, message: str):
+@commands.cooldown(1, 5, commands.BucketType.user)  # 5 second cooldown per user
+async def echo(ctx, *, message: str):
     """
     Command to repeat the input message and delete the command message.
     
@@ -250,13 +308,25 @@ async def copilotsays(ctx, *, message: str):
     # Check if the message author is on the blacklist
     if str(ctx.message.author.id) in config.blacklist: await ctx.send("You have been blacklisted from using this command."); return
     
-    # Verify that the member is business class or above
-    business_class, first_class, moderator_role = config.guild.get_role(1110680241569017966), config.guild.get_role(989232534313369630), config.guild.get_role(766386531681435678)
-    if business_class not in ctx.message.author.roles and first_class not in ctx.message.author.roles and moderator_role not in ctx.message.author.roles:
-        await ctx.send("This command is acessible only to members with business class or above."); return
+    # Check if user is moderator (can use freely)
+    moderator_role = config.guild.get_role(config.moderator_role_id)
+    is_moderator = moderator_role in ctx.message.author.roles
     
-    # Check if the message contains a ping
-    if moderator_role not in ctx.message.author.roles and (ctx.message.mentions or ctx.message.role_mentions or "@everyone" in message or "@here" in message):
+    # Check if user is server booster
+    server_booster_role = config.guild.get_role(config.server_booster_role_id)
+    is_booster = server_booster_role in ctx.message.author.roles
+    
+    # Check if user has required role (Business Class or above)
+    business_class = config.guild.get_role(config.business_class_role_id)
+    first_class = config.guild.get_role(config.first_class_role_id)
+    has_required_role = business_class in ctx.message.author.roles or first_class in ctx.message.author.roles
+    
+    # Allow if moderator, booster, or has required role
+    if not (is_moderator or is_booster or has_required_role):
+        await ctx.send("This command is accessible only to Business Class+, server boosters, or moderators."); return
+    
+    # Check if the message contains a ping (only moderators can ping)
+    if not is_moderator and (ctx.message.mentions or ctx.message.role_mentions or "@everyone" in message or "@here" in message):
         await ctx.send("You cannot ping a role or member with the bot."); return
             
     # Delete the command message
@@ -282,19 +352,30 @@ async def spam(ctx, *, message: str):
     # Check if the message author is on the blacklist
     if str(ctx.message.author.id) in config.blacklist: await ctx.send("You have been blacklisted from using this command."); return
     
-    # Verify that the member is business class or above
-    business_class, first_class, moderator_role = config.guild.get_role(1110680241569017966), config.guild.get_role(989232534313369630), config.guild.get_role(766386531681435678)
-    if business_class not in ctx.message.author.roles and first_class not in ctx.message.author.roles and moderator_role not in ctx.message.author.roles:
-        await ctx.send("This command is acessible only to members with business class or above."); return
+    # Check if user is moderator (can use freely)
+    moderator_role = config.guild.get_role(config.moderator_role_id)
+    is_moderator = moderator_role in ctx.message.author.roles
     
-    # Check if the message contains a ping
-    if moderator_role not in ctx.message.author.roles and (ctx.message.mentions or ctx.message.role_mentions or "@everyone" in message or "@here" in message):
+    # Check if user is server booster
+    server_booster_role = config.guild.get_role(config.server_booster_role_id)
+    is_booster = server_booster_role in ctx.message.author.roles
+    
+    # Check if user has required role (First Class or above)
+    first_class = config.guild.get_role(config.first_class_role_id)
+    has_required_role = first_class in ctx.message.author.roles
+    
+    # Allow if moderator, booster, or has required role
+    if not (is_moderator or is_booster or has_required_role):
+        await ctx.send("This command is accessible only to First Class+, server boosters, or moderators."); return
+    
+    # Check if the message contains a ping (only moderators can ping)
+    if not is_moderator and (ctx.message.mentions or ctx.message.role_mentions or "@everyone" in message or "@here" in message):
         await ctx.send("You cannot ping a role or member with the bot."); return
 
     # Delete the command message
     await ctx.message.delete()
 
-    # Send the input message to the channel
+    # Send the sanitized message to the channel
     for _ in range(5): await ctx.send(message)
 
 
@@ -315,41 +396,55 @@ async def view_member_history(ctx, member: discord.Member = None):
     # Check if the specified member is None
     if member is None: member = ctx.message.author
     
+    # Check if the member is a bot
+    if member.bot: await ctx.send("Bots don't have event history, silly!"); return
+    
     # Check if the member has attended at least one event
-    if not flight_hours_manager.member_history: await ctx.send(f"{member.mention} has not attended any events for the current month."); return
-    if str(member.id) not in flight_hours_manager.member_history: await ctx.send(f"{member.mention} has not attended any events for the current month."); return
-    if not flight_hours_manager.member_history[str(member.id)]: await ctx.send(f"{member.mention} has not attended any events for the current month."); return
+    if not flight_hours_manager.member_history: await ctx.send(f"{member.name} has not attended any events for the current month."); return
+    if str(member.id) not in flight_hours_manager.member_history: await ctx.send(f"{member.name} has not attended any events for the current month."); return
+    if not flight_hours_manager.member_history[str(member.id)]: await ctx.send(f"{member.name} has not attended any events for the current month."); return
     
     # Otherwise print all the channels
-    events_str = f"## Events Attended for {member.mention}\n"
-    events_str += f"-# This member has attended a total of {len(flight_hours_manager.member_history[str(member.id)])} event(s)."
-    events_str += ''.join(f"\n- {event_name}" for event_name in flight_hours_manager.member_history[str(member.id)])
+    num_events = len(flight_hours_manager.member_history[str(member.id)])
+    events_str = f"## Events Attended for {member.name}\n"
+    events_str += f"-# This member has attended a total of {num_events} event(s)."
+    for event_name in flight_hours_manager.member_history[str(member.id)]: events_str += f"\n- {event_name}"
     await ctx.send(events_str)
     
     
 @bot.command()
-async def view_event_history(ctx, event_index = 0):
+async def view_event_history(ctx, event_index: int = 0):
     """
     Description:
         Shows all of the events that a member has attended
         
     Arguments:
         ctx : The command object
-        member : The member to remove flight time from
+        event_index : The index of the event to view (must be an integer)
         
     Return:
         None
     """
     
+    try:
+        # Validate that event_index is an integer
+        event_index = int(event_index)
+    except (ValueError, TypeError):
+        await ctx.send("ERROR: Event index must be a valid integer.")
+        return
     
     # Check if there have been any events in the current month
-    if not flight_hours_manager.event_history: await ctx.send("There have not been any events in the current month."); return
+    if not flight_hours_manager.event_history: 
+        await ctx.send("There have not been any events in the current month.")
+        return
     
     # Check if the event index is valid
     num_events = len(flight_hours_manager.event_history)
-    if event_index < 0 or event_index > num_events: await ctx.send("ERROR: Event Index Out of Range."); return
+    if event_index < 0 or event_index > num_events: 
+        await ctx.send(f"ERROR: Event Index Must be Between 0 and {num_events}.")
+        return
     
-    # Get the list of all events that took place
+    # Get the list of all events that took place (now ordered consistently)
     events = list(flight_hours_manager.event_history.keys())
     
     # If the event index is 0, simply print out all of the events that happened during the current month
@@ -361,12 +456,18 @@ async def view_event_history(ctx, event_index = 0):
         for i, event_name in enumerate(events): events_str += f"\n{(i + 1)}. {event_name}"
         await ctx.send(events_str); return
         
-    # Get the Event Name as the Index for the Event History Dicitonary
+    # Get the Event Name as the Index for the Event History Dictionary (now consistently ordered)
     event_name = events[(event_index - 1)]
     
     # Create a list of member names
     member_names = []
-    for member_id in flight_hours_manager.event_history[event_name]: member = await bot.fetch_user(member_id); member_names.append(f"- {member.name}")
+    for member_id in flight_hours_manager.event_history[event_name]: 
+        try:
+            member = await bot.fetch_user(member_id)
+            member_names.append(f"- {member.name}")
+        except Exception as e:
+            await logger.error(f"Failed to fetch member {member_id}: {e}")
+            member_names.append(f"- Unknown User ({member_id})")
 
     # Send a message containing the people who attended the event
     attend_str = f"## Attendance for Event '{event_name}'\n"

@@ -12,10 +12,18 @@ class Logger:
         await self.info(f"Log channel set to {channel.mention}")
 
     async def info(self, message: str):
-        if self.log_channel is not None: await self.log_channel.send(message)
+        try:
+            if self.log_channel is not None: 
+                await self.log_channel.send(message)
+        except Exception as e:
+            print(f"Failed to send info message: {e}")
 
     async def error(self, message: str):
-        if self.log_channel is not None: await self.log_channel.send(f"**ERROR:** {message}")
+        try:
+            if self.log_channel is not None: 
+                await self.log_channel.send(f"**ERROR:** {message}")
+        except Exception as e:
+            print(f"Failed to send error message: {e}")
 
 
 log_channel = config.log_channel
