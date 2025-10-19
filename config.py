@@ -129,6 +129,9 @@ class Configurations:
             backup_path = f"{file_path}.backup"
             shutil.copy2(file_path, backup_path)
         
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
         # Atomic write using temporary file
         try:
             with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(file_path), delete=False) as temp_file:
@@ -273,6 +276,9 @@ class FlightHours:
                 backup_path = f"{file_path}.backup"
                 shutil.copy2(file_path, backup_path)
             
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            
             # Atomic write using temporary file
             try:
                 with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(file_path), delete=False) as temp_file:
@@ -355,6 +361,9 @@ class FlightHours:
         return None
     
     async def export(self, file_path):
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        
         with open(file_path, "w") as file:
         
             # Iterate through the dictionary
