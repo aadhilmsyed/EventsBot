@@ -48,18 +48,22 @@ async def metar(ctx, icao_code: str):
             color=discord.Color.blue()
         )
 
-        # Add Other Fields
-        embed.add_field(name="Latitude", value=f"{metar_data['lat']}")
-        embed.add_field(name="Longitude", value=f"{metar_data['lon']}")
-        embed.add_field(name="Altitude", value=f"{metar_data['elev']}")
-        embed.add_field(name="Temperature (°C)", value=f"{metar_data['temp']}°C")
-        embed.add_field(name="Dew Point (°C)", value=f"{metar_data['dewp']}°C")
-        embed.add_field(name="Wind Direction", value=f"{metar_data['wdir']}°")
-        embed.add_field(name="Wind Speed (KT)", value=f"{metar_data['wspd']} KT")
-        embed.add_field(name="Visibility", value=f"{metar_data['visib']}")
-        embed.add_field(name="Altimeter (mb)", value=f"{metar_data['altim']} mb")
-        embed.add_field(name="Sea Level Pressure (mb)", value=f"{metar_data['slp']} mb")
-        embed.add_field(name="Report Time", value=f"{metar_data['reportTime']}")
+        # Add Other Fields with safety checks for international airports
+        embed.add_field(name="Latitude", value=f"{metar_data.get('lat', 'N/A')}")
+        embed.add_field(name="Longitude", value=f"{metar_data.get('lon', 'N/A')}")
+        embed.add_field(name="Altitude", value=f"{metar_data.get('elev', 'N/A')}")
+        embed.add_field(name="Temperature (°C)", value=f"{metar_data.get('temp', 'N/A')}°C")
+        embed.add_field(name="Dew Point (°C)", value=f"{metar_data.get('dewp', 'N/A')}°C")
+        embed.add_field(name="Wind Direction", value=f"{metar_data.get('wdir', 'N/A')}°")
+        embed.add_field(name="Wind Speed (KT)", value=f"{metar_data.get('wspd', 'N/A')} KT")
+        embed.add_field(name="Visibility", value=f"{metar_data.get('visib', 'N/A')}")
+        embed.add_field(name="Altimeter (mb)", value=f"{metar_data.get('altim', 'N/A')} mb")
+        
+        # Only add Sea Level Pressure if it exists (not available for all international airports)
+        if 'slp' in metar_data and metar_data['slp'] is not None:
+            embed.add_field(name="Sea Level Pressure (mb)", value=f"{metar_data['slp']} mb")
+        
+        embed.add_field(name="Report Time", value=f"{metar_data.get('reportTime', 'N/A')}")
 
         # Check if there are cloud cover data
         if 'clouds' in metar_data:
@@ -70,9 +74,10 @@ async def metar(ctx, icao_code: str):
         # Add raw METAR Info to Embed
         embed.add_field(name="Raw METAR", value=f"{metar_data['rawOb']}")
 
-        # Add airport picture as the thumbnail
-        weather_thumbnail_url = os.getenv('WEATHER_THUMBNAIL_URL', 'https://media.istockphoto.com/id/537337166/photo/air-trafic-control-tower-and-airplance-at-paris-airport.jpg?b=1&s=612x612&w=0&k=20&c=kp14V8AXFNUh5jOy3xPQ_sxhOZLWXycdBL-eUGviMOQ=')
-        embed.set_thumbnail(url=weather_thumbnail_url)
+        # Add airport picture as the thumbnail (only if URL is valid)
+        weather_thumbnail_url = os.getenv('WEATHER_THUMBNAIL_URL')
+        if weather_thumbnail_url and weather_thumbnail_url.startswith(('http://', 'https://')):
+            embed.set_thumbnail(url=weather_thumbnail_url)
 
         # Set Embed Footer
         text = "Data Provided by Aviation Weather Center API."
