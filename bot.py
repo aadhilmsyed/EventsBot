@@ -69,12 +69,14 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_disconnect():
     """Handle bot disconnection"""
-    await logger.error("Bot disconnected from Discord. Attempting to reconnect...")
+    # await logger.error("Bot disconnected from Discord. Attempting to reconnect...")
+    pass
 
 @bot.event
 async def on_resume():
     """Handle bot reconnection"""
-    await logger.info("Bot reconnected to Discord successfully.")
+    # await logger.info("Bot reconnected to Discord successfully.")
+    pass
 
 @bot.event
 async def on_error(event, *args, **kwargs):
