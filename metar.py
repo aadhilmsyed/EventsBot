@@ -58,11 +58,7 @@ async def metar(ctx, icao_code: str):
         embed.add_field(name="Wind Speed (KT)", value=f"{metar_data.get('wspd', 'N/A')} KT")
         embed.add_field(name="Visibility", value=f"{metar_data.get('visib', 'N/A')}")
         embed.add_field(name="Altimeter (mb)", value=f"{metar_data.get('altim', 'N/A')} mb")
-        
-        # Only add Sea Level Pressure if it exists (not available for all international airports)
-        if 'slp' in metar_data and metar_data['slp'] is not None:
-            embed.add_field(name="Sea Level Pressure (mb)", value=f"{metar_data['slp']} mb")
-        
+        embed.add_field(name="Sea Level Pressure (mb)", value=f"{metar_data.get('slp', 'N/A')} mb")
         embed.add_field(name="Report Time", value=f"{metar_data.get('reportTime', 'N/A')}")
 
         # Check if there are cloud cover data
