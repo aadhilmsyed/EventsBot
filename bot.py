@@ -64,6 +64,7 @@ async def on_ready():
             
 @bot.event
 async def on_command_error(ctx, error): 
+    await ctx.send(error)
     await logger.error(f"{error} {ctx.message.jump_url}")
 
 @bot.event
