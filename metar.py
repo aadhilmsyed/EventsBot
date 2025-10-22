@@ -151,8 +151,13 @@ async def atis(ctx, icao_code: str):
             await ctx.send("Invalid ICAO code format. It must be 4 alphanumeric characters.")
             return
 
+        # Check if the ICAO code is a US ICAO Code
+        if not icao_code.startswith("K"):
+            await ctx.send("ATIS information is only available for US airports.")
+            return
+
         # Get the ATIS data from the API
-        atis_data = await get_atis_info(icao_code)
+        atis_data = await get_atis_info(icao_code.upper())
 
         # Send Error Message and Exit Function if No Information was Retrieved
         if atis_data is None:
