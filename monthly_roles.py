@@ -76,132 +76,92 @@ async def update_roles(ctx):
         rank_roles = {}
         for role_id in config.roles.keys():
             role = config.guild.get_role(role_id)
-            if role:
-                rank_roles[role_id] = role
-                await logger.info(f"Found rank role: {role.name}")
-            else:
-                await logger.error(f"Role with ID {role_id} not found in guild")
+            if role: rank_roles[role_id] = role
+            else: await logger.error(f"Role with ID {role_id} not found in guild")
         
         if not rank_roles:
-            await ctx.send("No rank roles found! Please check your configuration.")
+            await logger.error("No rank roles found! Please check your configuration.")
             return
         
         # Step 2: Remove all rank roles from members who have them
-        await logger.info("Phase 1: Removing existing rank roles from all members...")
-        total_removals = 0
-        
+        logger.info("Removing roles earned during the previous month...")
         for role_id, role in rank_roles.items():
+
+            # Get all members with the role
             members_with_role = role.members
-            await logger.info(f"Removing {role.name} from {len(members_with_role)} members...")
             
+            # Remove the role from each member
             for member in members_with_role:
-                if member.bot:
-                    continue  # Skip bots
-                    
-                try:
-                    await member.remove_roles(role)
-                    total_removals += 1
-                except discord.HTTPException as e:
-                    if e.status == 429:  # Rate limited
-                        await logger.error(f"Rate limited while removing {role.name}. Waiting...")
-                        await asyncio.sleep(e.retry_after)
-                        try:
-                            await member.remove_roles(role)
-                            total_removals += 1
-                        except Exception as retry_error:
-                            await logger.error(f"Failed to remove {role.name} from {member.mention} after retry: {retry_error}")
-                    else:
-                        await logger.error(f"Failed to remove {role.name} from {member.mention}: {e}")
-                except Exception as e:
-                    await logger.error(f"Failed to remove {role.name} from {member.mention}: {e}")
-                
-                # Small delay to prevent rate limiting
-                await asyncio.sleep(0.05)
+                if member.bot: continue # Skip bots
+                while True:
+                    try: 
+                        await member.remove_roles(role)
+                        await logger.info(f"- Removed {role.name} from {member.mention}")
+                        break
+                    except Exception as e: await asyncio.sleep(0.05)
+
+            # Small delay to prevent rate limiting
+            await asyncio.sleep(0.05)
         
-        await logger.info(f"Phase 1 Complete: Removed {total_removals} rank roles from members.")
-        
+        # Initialize role count dictionary
+        role_count = {role_id: 0 for role_id in rank_roles.keys()}
+
         # Step 3: Add earned roles to members with flight time
-        await logger.info("Phase 2: Adding earned roles to members with flight time...")
-        total_additions = 0
-        members_with_flight_time = 0
-        
+        logger.info("Adding roles earned during the current month...")
         for member_id_str, minutes in flight_hours_manager.flight_hours.items():
-            if minutes == 0:
-                continue
-                
-            members_with_flight_time += 1
             
             # Calculate earned role
             earned_role_id = calculate_earned_role(minutes)
-            if not earned_role_id or earned_role_id not in rank_roles:
-                continue
-            
+            if not earned_role_id or earned_role_id not in rank_roles: continue
             earned_role = rank_roles[earned_role_id]
             
-            # Get member object
             try:
+
+                # Get member object
                 member = await config.guild.fetch_member(int(member_id_str))
-                if not member or member.bot:
-                    continue
+                if not member or member.bot: continue
                     
                 # Add the earned role
                 await member.add_roles(earned_role)
-                total_additions += 1
+                role_count[earned_role_id] += 1
                 
                 # Log the assignment
-                hours = (minutes // 60) + 1
-                await logger.info(f"Assigned {earned_role.name} to {member.mention} ({hours} hours earned)")
+                h, m = divmod(minutes, 60)
+                await logger.info(f"- Assigned {earned_role.name} to {member.mention} ({h}h {m}m flown)")
                 
-            except discord.HTTPException as e:
-                if e.status == 429:  # Rate limited
-                    await logger.error(f"Rate limited while adding roles. Waiting...")
-                    await asyncio.sleep(e.retry_after)
-                    try:
-                        member = await config.guild.fetch_member(int(member_id_str))
-                        if member and not member.bot:
-                            await member.add_roles(earned_role)
-                            total_additions += 1
-                    except Exception as retry_error:
-                        await logger.error(f"Failed to add {earned_role.name} to member {member_id_str} after retry: {retry_error}")
-                else:
-                    await logger.error(f"Failed to add {earned_role.name} to member {member_id_str}: {e}")
             except Exception as e:
                 await logger.error(f"Failed to process member {member_id_str}: {e}")
             
             # Small delay to prevent rate limiting
             await asyncio.sleep(0.05)
         
-        await logger.info(f"Phase 2 Complete: Added {total_additions} earned roles to {members_with_flight_time} members with flight time.")
-        
-        # Step 4: Export and summarize
-        await ctx.send("Role Updates Complete!")
-        await logger.info("Role Updates Complete. Now Exporting Flight Hours...")
-        
-        # Send the exported file to the log channel
-        file_path = "/data/logs/role_updates.txt"
-        await flight_hours_manager.export(file_path)
-        with open(file_path, "rb") as file: 
-            await config.log_channel.send(file=discord.File(file, file_path))
-        
-        # Send summary statistics
-        num_events = len(flight_hours_manager.event_history)
+        # Step 4: Send member summary statistics  
         num_members = len(flight_hours_manager.flight_hours)
-        await logger.info(f"Summary: {num_events} events, {num_members} members logged time, {total_removals} roles removed, {total_additions} roles added.")
+        summary = f"Role Updates Complete! A total of {num_members} logged flight time during the current month."
+        for role_id, count in role_count.items(): summary += f"\n- {rank_roles[role_id].name}: {count} members"
+        await ctx.send(summary)
+        await logger.info(summary)
+
+        # Step 5: Send event summary statistics
+        num_events = len(flight_hours_manager.event_history)
+        summary = f"A total of {num_events} events took place during the current month."
+        for event_name, members in flight_hours_manager.event_history.items(): 
+            summary += f"\n- {event_name}: {len(members)} members"
+        await ctx.send(summary)
+        await logger.info(summary)
         
-        # Step 5: Clear flight hours
+        # Step 6: Clear flight hours
         await ctx.send("Clearing Flight Hours...")
-        
         try:
             flight_hours_manager.start_time.clear()
             flight_hours_manager.flight_hours.clear()
             flight_hours_manager.event_history.clear()
             flight_hours_manager.member_history.clear()
-            flight_hours_manager.save()
-            
+            flight_hours_manager.save()        
             await ctx.send("Flight Hours Cleared.")
             await logger.info(f"Flight Hours Were Cleared by {ctx.message.author.mention}")
-            
         except Exception as e: 
+            await ctx.send("Error clearing flight hours. Please check the logs for more information.")
             await logger.error(f"Error clearing flight hours: {e}")
     
     finally:
@@ -236,7 +196,6 @@ async def clear_flight_logs(ctx):
         flight_hours_manager.flight_hours.clear()
         flight_hours_manager.event_history.clear()
         flight_hours_manager.member_history.clear()
-        
     except Exception as e: await logger.error(e)
     
     # Export the updated data back to the file
