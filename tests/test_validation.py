@@ -1,6 +1,10 @@
 """
 Tests for validation.py module.
 """
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pytest
 from validation import (
     sanitize_event_name,
