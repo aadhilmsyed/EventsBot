@@ -105,13 +105,13 @@ jobs:
         echo "MEMBER_LOGS_CHANNEL_ID=${{ secrets.MEMBER_LOGS_CHANNEL_ID }}" >> $GITHUB_ENV
 
     - name: Run integration tests
-      if: env.DISCORD_TOKEN != '' && env.DISCORD_TOKEN != '${{ secrets.DISCORD_TOKEN }}'
+      if: env.DISCORD_TOKEN != '' && env.DISCORD_TOKEN != 'test_token'
       run: |
         pytest tests/test_main.py -v --tb=short -m integration
       timeout-minutes: 10
 
     - name: Skip integration tests (no token)
-      if: env.DISCORD_TOKEN == '' || env.DISCORD_TOKEN == '${{ secrets.DISCORD_TOKEN }}'
+      if: env.DISCORD_TOKEN == '' || env.DISCORD_TOKEN == 'test_token'
       run: |
         echo "⚠️ Skipping integration tests - DISCORD_TOKEN secret not provided"
         echo "To enable integration tests, add DISCORD_TOKEN to repository secrets"
