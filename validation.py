@@ -8,18 +8,18 @@ def sanitize_event_name(event_name: str) -> str:
     if not event_name or not event_name.strip():
         raise ValueError("Event name cannot be empty")
     
-    # Remove excessive whitespace and limit length
-    sanitized = event_name.strip()
-    if len(sanitized) > 100:
-        raise ValueError("Event name cannot exceed 100 characters")
+    # # Remove excessive whitespace and limit length
+    # sanitized = event_name.strip()
+    # if len(sanitized) > 100:
+    #     raise ValueError("Event name cannot exceed 100 characters")
     
     # Remove potentially dangerous characters but allow most Unicode
-    sanitized = re.sub(r'[<>"\']', '', sanitized)
+    # sanitized = re.sub(r'[<>"\']', '', sanitized)
     
     # HTML escape to prevent injection
-    sanitized = html.escape(sanitized)
+    # sanitized = html.escape(sanitized)
     
-    return sanitized
+    return event_name
 
 def validate_flight_time(minutes: int) -> int:
     """Validate flight time input"""
