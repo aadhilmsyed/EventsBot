@@ -4,17 +4,18 @@ import io
 from datetime import timedelta
 
 import discord
+
 # Import Other Necessary Libraries
 import pandas as pd
 from discord.ext import commands
 
 # Import Bot & Logger Objects
 from bot import bot
+
 # Import Necessary Local Files
 from config import config, flight_hours_manager
 from logger import logger
-from validation import (sanitize_event_name, validate_flight_time,
-                        validate_member_id)
+from validation import sanitize_event_name, validate_flight_time, validate_member_id
 
 
 @bot.command()

@@ -9,9 +9,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 
-from validation import (sanitize_event_name, sanitize_message,
-                        validate_flight_time, validate_icao_code,
-                        validate_member_id)
+from validation import (
+    sanitize_event_name,
+    sanitize_message,
+    validate_flight_time,
+    validate_icao_code,
+    validate_member_id,
+)
 
 
 class TestSanitizeEventName:
