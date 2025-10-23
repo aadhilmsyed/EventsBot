@@ -2,6 +2,7 @@
 Unit tests for monthly_roles.py module - Pure function tests only.
 """
 import pytest
+import os
 from unittest.mock import patch
 
 
