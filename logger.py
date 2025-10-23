@@ -3,9 +3,11 @@ from discord.ext import commands
 
 from config import config
 
+
 class Logger:
 
-    def __init__(self, channel: discord.TextChannel): self.log_channel = channel
+    def __init__(self, channel: discord.TextChannel):
+        self.log_channel = channel
 
     async def setChannel(self, channel: discord.TextChannel):
         self.log_channel = channel
@@ -13,14 +15,14 @@ class Logger:
 
     async def info(self, message: str):
         try:
-            if self.log_channel is not None: 
+            if self.log_channel is not None:
                 await self.log_channel.send(message)
         except Exception as e:
             print(f"Failed to send info message: {e}")
 
     async def error(self, message: str):
         try:
-            if self.log_channel is not None: 
+            if self.log_channel is not None:
                 await self.log_channel.send(f"**ERROR:** {message}")
         except Exception as e:
             print(f"Failed to send error message: {e}")

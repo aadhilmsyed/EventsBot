@@ -4,7 +4,7 @@ import dotenv
 import sys
 
 dotenv.load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 # Validate required environment variables
 if not TOKEN:
@@ -37,7 +37,11 @@ from mod_commands import restrict, unrestrict, view_restricted_channels
 from mod_commands import add_event_vc, remove_event_vc, view_event_vc
 from mod_commands import add_flight_time, remove_flight_time, view_flight_time
 from mod_commands import blacklist, whitelist, view_blacklist
-from mod_commands import add_event_attendance, remove_event_attendance, view_event_attendance
+from mod_commands import (
+    add_event_attendance,
+    remove_event_attendance,
+    view_event_attendance,
+)
 
 # Import Flight Logging
 from flight_logs import on_scheduled_event_update, on_voice_state_update
@@ -45,4 +49,3 @@ from monthly_roles import update_roles, clear_flight_logs
 
 # Start the Bot
 bot.run(TOKEN)
-

@@ -49,7 +49,7 @@ jobs:
 
     - name: Run unit tests with pytest
       run: |
-        pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing --tb=short -m "not integration"
+        pytest tests/ -v --tb=short -m "not integration" --cov=validation --cov=logger --cov-report=xml --cov-report=term-missing --cov-fail-under=60
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

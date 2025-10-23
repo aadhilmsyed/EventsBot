@@ -17,6 +17,7 @@ import os
 from config import config
 from validation import validate_icao_code
 
+
 @bot.command()
 async def metar(ctx, icao_code: str):
     """
@@ -45,34 +46,52 @@ async def metar(ctx, icao_code: str):
         embed = discord.Embed(
             title=f"METAR for {metar_data['icaoId']}",
             description=f"{metar_data['name']}",
-            color=discord.Color.blue()
+            color=discord.Color.blue(),
         )
 
         # Add Other Fields with safety checks for international airports
         embed.add_field(name="Latitude", value=f"{metar_data.get('lat', 'N/A')}")
         embed.add_field(name="Longitude", value=f"{metar_data.get('lon', 'N/A')}")
         embed.add_field(name="Altitude", value=f"{metar_data.get('elev', 'N/A')}")
-        embed.add_field(name="Temperature (°C)", value=f"{metar_data.get('temp', 'N/A')}°C")
-        embed.add_field(name="Dew Point (°C)", value=f"{metar_data.get('dewp', 'N/A')}°C")
-        embed.add_field(name="Wind Direction", value=f"{metar_data.get('wdir', 'N/A')}°")
-        embed.add_field(name="Wind Speed (KT)", value=f"{metar_data.get('wspd', 'N/A')} KT")
+        embed.add_field(
+            name="Temperature (°C)", value=f"{metar_data.get('temp', 'N/A')}°C"
+        )
+        embed.add_field(
+            name="Dew Point (°C)", value=f"{metar_data.get('dewp', 'N/A')}°C"
+        )
+        embed.add_field(
+            name="Wind Direction", value=f"{metar_data.get('wdir', 'N/A')}°"
+        )
+        embed.add_field(
+            name="Wind Speed (KT)", value=f"{metar_data.get('wspd', 'N/A')} KT"
+        )
         embed.add_field(name="Visibility", value=f"{metar_data.get('visib', 'N/A')}")
-        embed.add_field(name="Altimeter (mb)", value=f"{metar_data.get('altim', 'N/A')} mb")
-        embed.add_field(name="Sea Level Pressure (mb)", value=f"{metar_data.get('slp', 'N/A')} mb")
-        embed.add_field(name="Report Time", value=f"{metar_data.get('reportTime', 'N/A')}")
+        embed.add_field(
+            name="Altimeter (mb)", value=f"{metar_data.get('altim', 'N/A')} mb"
+        )
+        embed.add_field(
+            name="Sea Level Pressure (mb)", value=f"{metar_data.get('slp', 'N/A')} mb"
+        )
+        embed.add_field(
+            name="Report Time", value=f"{metar_data.get('reportTime', 'N/A')}"
+        )
 
         # Check if there are cloud cover data
-        if 'clouds' in metar_data:
-            clouds = metar_data['clouds']
-            cloud_info = "\n".join([f"{cloud['cover']} Clouds at {cloud['base']} feet" for cloud in clouds])
+        if "clouds" in metar_data:
+            clouds = metar_data["clouds"]
+            cloud_info = "\n".join(
+                [f"{cloud['cover']} Clouds at {cloud['base']} feet" for cloud in clouds]
+            )
             embed.add_field(name="Cloud Cover", value=cloud_info)
 
         # Add raw METAR Info to Embed
         embed.add_field(name="Raw METAR", value=f"{metar_data['rawOb']}")
 
         # Add airport picture as the thumbnail (only if URL is valid)
-        weather_thumbnail_url = os.getenv('WEATHER_THUMBNAIL_URL')
-        if weather_thumbnail_url and weather_thumbnail_url.startswith(('http://', 'https://')):
+        weather_thumbnail_url = os.getenv("WEATHER_THUMBNAIL_URL")
+        if weather_thumbnail_url and weather_thumbnail_url.startswith(
+            ("http://", "https://")
+        ):
             embed.set_thumbnail(url=weather_thumbnail_url)
 
         # Set Embed Footer
@@ -84,10 +103,10 @@ async def metar(ctx, icao_code: str):
     except ValueError as e:
         await ctx.send(f"Invalid ICAO code: {e}")
         await logger.error(f"Invalid ICAO code in metar command: {e}")
-    except Exception as e: 
+    except Exception as e:
         await logger.error(f"An error occurred in metar command: {e}")
 
-    
+
 async def get_metar_info(icao_code: str):
     """
     Description:
@@ -104,24 +123,29 @@ async def get_metar_info(icao_code: str):
         requests.RequestException: If there is an issue with the HTTP request.
     """
     # API URL for METAR info
-    metar_base_url = os.getenv('METAR_API_BASE_URL', 'https://aviationweather.gov/cgi-bin/data/metar.php')
+    metar_base_url = os.getenv(
+        "METAR_API_BASE_URL", "https://aviationweather.gov/cgi-bin/data/metar.php"
+    )
     api_url = f"{metar_base_url}?ids={icao_code}&format=json"
-    
+
     try:
         # Send a GET request to the API with timeout
         response = requests.get(api_url, timeout=10)
 
         # Return the response if the request was successful
-        if response.status_code == 200: 
+        if response.status_code == 200:
             data = response.json()
             return data[0] if data else None
-        
+
         # If the request was unsuccessful, return nothing
-        else: return None
+        else:
+            return None
 
     # Log any Errors
     except requests.exceptions.Timeout:
-        await logger.error(f"Timeout occurred while fetching METAR data for {icao_code}")
+        await logger.error(
+            f"Timeout occurred while fetching METAR data for {icao_code}"
+        )
         return None
     except requests.exceptions.RequestException as e:
         await logger.error(f"Request error occurred in get_metar_info: {e}")
@@ -132,6 +156,7 @@ async def get_metar_info(icao_code: str):
     except Exception as e:
         await logger.error(f"An unexpected error occurred in get_metar_info: {e}")
         return None
+
 
 @bot.command()
 async def atis(ctx, icao_code: str):
@@ -148,7 +173,9 @@ async def atis(ctx, icao_code: str):
     try:
         # Perform Input Validation on the ICAO Airport Code
         if not icao_code.isalnum() or not (len(icao_code) == 4):
-            await ctx.send("Invalid ICAO code format. It must be 4 alphanumeric characters.")
+            await ctx.send(
+                "Invalid ICAO code format. It must be 4 alphanumeric characters."
+            )
             return
 
         # Check if the ICAO code is a US ICAO Code
@@ -165,10 +192,11 @@ async def atis(ctx, icao_code: str):
             return
 
         # Send the ATIS information as a simple message
-        await ctx.send(atis_data['datis'])
+        await ctx.send(atis_data["datis"])
 
     except Exception as e:
         await logger.error(f"An error occurred in atis command: {e}")
+
 
 async def get_atis_info(icao_code: str):
     """
@@ -185,9 +213,9 @@ async def get_atis_info(icao_code: str):
         requests.RequestException: If there is an issue with the HTTP request.
     """
     # API URL for ATIS info
-    atis_base_url = os.getenv('ATIS_API_BASE_URL', 'https://datis.clowd.io/api')
+    atis_base_url = os.getenv("ATIS_API_BASE_URL", "https://datis.clowd.io/api")
     api_url = f"{atis_base_url}/{icao_code}"
-    
+
     try:
         # Send a GET request to the API with timeout
         response = requests.get(api_url, timeout=10)
@@ -196,7 +224,7 @@ async def get_atis_info(icao_code: str):
         if response.status_code == 200:
             data = response.json()
             return data[0] if data else None
-        
+
         # If the request was unsuccessful, return nothing
         else:
             return None

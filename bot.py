@@ -8,10 +8,11 @@ from config import config, flight_hours_manager
 
 # Define Intents & Create Bot Object
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix = '!', intents = intents, help_command = None)
+bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 # Remove the help command
-bot.remove_command('help')
+bot.remove_command("help")
+
 
 # Function to Determine Successful Connection
 @bot.event
@@ -28,44 +29,51 @@ async def on_ready():
     Returns:
         None
     """
-    
+
     # Update Logger with Login Information
     config.guild = bot.get_guild(config.guild_id)
     config.log_channel = config.guild.get_channel(config.log_channel_id)
     await logger.setChannel(config.log_channel)
-    await logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
-    
+    await logger.info(f"Logged in as {bot.user.name} ({bot.user.id})")
+
     # Load in Configuration Data from File
     config.load()
     flight_hours_manager.load()
-    
+
     # If there is an ongoing event retrieve the event VC
-    if flight_hours_manager.active_event: await logger.info(f'Resuming Event Logging...'); return
-        
+    if flight_hours_manager.active_event:
+        await logger.info(f"Resuming Event Logging...")
+        return
+
     # If an event has already started, then start logging for that event
     for event in config.guild.scheduled_events:
         if event.status == EventStatus.active:
-            
+
             # Update Logger Information
             await logger.info(f"Starting Flight Logging for Event '{event.name}'.")
-            
+
             # Update the Event Voice Channel & Event Status Flag
             flight_hours_manager.active_event = event.name
             flight_hours_manager.event_history[event.name] = set()
-            if event.channel: flight_hours_manager.voice_channels.append(event.channel)
-            
+            if event.channel:
+                flight_hours_manager.voice_channels.append(event.channel)
+
             # If Members Are Already in the Voice Channel, Log Them
             if event.channel:
                 for member in event.channel.members:
                     flight_hours_manager.log_start_time(member.id)
-                    await logger.info(f"{member.mention} Joined {event.channel.mention}. Starting Logging...")
-                
+                    await logger.info(
+                        f"{member.mention} Joined {event.channel.mention}. Starting Logging..."
+                    )
+
             break
-            
+
+
 @bot.event
-async def on_command_error(ctx, error): 
+async def on_command_error(ctx, error):
     await ctx.send(error)
     await logger.error(f"{error} {ctx.message.jump_url}")
+
 
 @bot.event
 async def on_disconnect():
@@ -73,14 +81,15 @@ async def on_disconnect():
     # await logger.error("Bot disconnected from Discord. Attempting to reconnect...")
     pass
 
+
 @bot.event
 async def on_resume():
     """Handle bot reconnection"""
     # await logger.info("Bot reconnected to Discord successfully.")
     pass
 
+
 @bot.event
 async def on_error(event, *args, **kwargs):
     """Handle general bot errors"""
     await logger.error(f"An error occurred in event {event}: {args} {kwargs}")
-

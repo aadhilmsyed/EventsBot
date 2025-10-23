@@ -14,6 +14,7 @@ from config import config, flight_hours_manager
 from datetime import datetime as time
 import pytz
 
+
 @bot.event
 async def on_voice_state_update(member, before, after):
     """
@@ -30,59 +31,86 @@ async def on_voice_state_update(member, before, after):
     Returns:
         None
     """
-    
+
     # Check if there is an ongoing event
-    if not flight_hours_manager.active_event: return
-    
+    if not flight_hours_manager.active_event:
+        return
+
     # Check if there was a change in the voice channel
-    if before.channel == after.channel: return
-    
+    if before.channel == after.channel:
+        return
+
     # Case 1: Member switches from non-event VC to a non-event VC
-    if before.channel not in flight_hours_manager.voice_channels and after.channel not in flight_hours_manager.voice_channels: return
-    
+    if (
+        before.channel not in flight_hours_manager.voice_channels
+        and after.channel not in flight_hours_manager.voice_channels
+    ):
+        return
+
     # Case 2: Member switches from event VC to a event VC
-    if before.channel in flight_hours_manager.voice_channels and after.channel in flight_hours_manager.voice_channels:
-    
+    if (
+        before.channel in flight_hours_manager.voice_channels
+        and after.channel in flight_hours_manager.voice_channels
+    ):
+
         # Simply log the change of channels to the log channel
-        await logger.info(f"{member.mention} switched from <#{before.channel.id}> to <#{after.channel.id}>. Resuming Logging...")
-        
+        await logger.info(
+            f"{member.mention} switched from <#{before.channel.id}> to <#{after.channel.id}>. Resuming Logging..."
+        )
+
     # Case 3: Member switches from a non-event VC to an event VC (Joining Event)
-    if before.channel not in flight_hours_manager.voice_channels and after.channel in flight_hours_manager.voice_channels:
-        
+    if (
+        before.channel not in flight_hours_manager.voice_channels
+        and after.channel in flight_hours_manager.voice_channels
+    ):
+
         # Check if the member is a human member
-        if member.bot: return
-        
+        if member.bot:
+            return
+
         # Log the start time for the member
         success = flight_hours_manager.log_start_time(member.id, member)
         if not success:
             return  # Bot was filtered out, don't log
-        
+
         # Update Information to the Logger
-        await logger.info(f"{member.mention} joined <#{after.channel.id}>. Starting Logging...")
-        
+        await logger.info(
+            f"{member.mention} joined <#{after.channel.id}>. Starting Logging..."
+        )
+
         # Export the updated data back to the file
-        flight_hours_manager.save(); return
-        
+        flight_hours_manager.save()
+        return
+
     # Case 4: Members switches from event VC to a non-event VC (Leaving Event)
-    if before.channel in flight_hours_manager.voice_channels and after.channel not in flight_hours_manager.voice_channels:
-        
+    if (
+        before.channel in flight_hours_manager.voice_channels
+        and after.channel not in flight_hours_manager.voice_channels
+    ):
+
         # Check if the member is a human member
-        if member.bot: return
-        
+        if member.bot:
+            return
+
         # Log the left member and get the elapsed time
         elapsed_minutes = flight_hours_manager.log_end_time(member.id, member)
         if elapsed_minutes == 0 and member.bot:
             return  # Bot was filtered out, don't log
-        
+
         # Update the logger information to the log channel
-        await logger.info(f"{member.mention} left <#{before.channel.id}>. Ending Logging...")
+        await logger.info(
+            f"{member.mention} left <#{before.channel.id}>. Ending Logging..."
+        )
         total_flight_time = flight_hours_manager.flight_hours.get(str(member.id), 0)
-        await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to {member.mention}. " \
-                          f"{member.mention} has a total flight time of {int(total_flight_time)} minutes.")
-                          
+        await logger.info(
+            f"{int(elapsed_minutes)} minutes of flight time were added to {member.mention}. "
+            f"{member.mention} has a total flight time of {int(total_flight_time)} minutes."
+        )
+
         # Export the updated data back to the file
-        flight_hours_manager.save(); return
-        
+        flight_hours_manager.save()
+        return
+
 
 @bot.event
 async def on_scheduled_event_update(before, after):
@@ -102,57 +130,70 @@ async def on_scheduled_event_update(before, after):
 
     # Case 1: Event Status Changes to Active (Start Logging for the Event)
     if after.status == EventStatus.active:
-        
+
         # Update Logger Information
         await logger.info(f"Starting Logging for Event '{after.name}'.")
-        
+
         # Set the active event and add the event VC to the voice channel list
         flight_hours_manager.active_event = after.name
         flight_hours_manager.event_history[after.name] = set()
-        if after.channel: flight_hours_manager.voice_channels.append(after.channel)
-        
+        if after.channel:
+            flight_hours_manager.voice_channels.append(after.channel)
+
         # Log any members who are already in the voice channel
         if after.channel:
             for member in after.channel.members:
-                if member.bot: continue
+                if member.bot:
+                    continue
                 success = flight_hours_manager.log_start_time(member.id, member)
                 if not success:
                     continue  # Bot was filtered out, skip logging
-                await logger.info(f"{member.mention} joined {after.channel.mention}. Starting Logging...")
+                await logger.info(
+                    f"{member.mention} joined {after.channel.mention}. Starting Logging..."
+                )
 
         # Export the updated data back to the file
-        flight_hours_manager.save(); return
-        
+        flight_hours_manager.save()
+        return
+
     # Case 2: Event Status Changes to Ended (End Logging for the Event)
     if after.status == EventStatus.ended:
-    
+
         # End the Logging for all members who joined the event
         for member_id in list(flight_hours_manager.start_time.keys()):
-            
+
             # Get member object first to check if it's a bot
             member = config.guild.get_member(int(member_id))
             if not member or member.bot:
                 continue  # Skip bots or non-existent members
-            
+
             # Log the left member and get the elapsed time
             elapsed_minutes = flight_hours_manager.log_end_time(member_id, member)
             if elapsed_minutes == 0:
                 continue  # No time logged (shouldn't happen for valid members)
-            
+
             # Update the logger information to the log channel
-            if not member.voice: continue
-            await logger.info(f"<@{member_id}> left {member.voice.channel.mention}. Ending Logging...")
+            if not member.voice:
+                continue
+            await logger.info(
+                f"<@{member_id}> left {member.voice.channel.mention}. Ending Logging..."
+            )
             total_flight_time = flight_hours_manager.flight_hours.get(str(member_id), 0)
-            await logger.info(f"{int(elapsed_minutes)} minutes of flight time were added to <@{member_id}>. " \
-                              f"<@{member_id}> has a total flight time of {int(total_flight_time)} minutes.")
-            
+            await logger.info(
+                f"{int(elapsed_minutes)} minutes of flight time were added to <@{member_id}>. "
+                f"<@{member_id}> has a total flight time of {int(total_flight_time)} minutes."
+            )
+
         # Update logger information to the log channel
-        await logger.info(f"Ending Logging for Event '{before.name}'. A total of {len(flight_hours_manager.event_history[before.name])} members joined.")
-        
+        await logger.info(
+            f"Ending Logging for Event '{before.name}'. A total of {len(flight_hours_manager.event_history[before.name])} members joined."
+        )
+
         # Reset the active event and clear out the event VCs
         flight_hours_manager.active_event = None
         flight_hours_manager.voice_channels.clear()
         flight_hours_manager.start_time.clear()
-                              
+
         # Export the updated data back to the file
-        flight_hours_manager.save(); return
+        flight_hours_manager.save()
+        return
