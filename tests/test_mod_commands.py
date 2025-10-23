@@ -42,8 +42,8 @@ class TestModCommandUtilities:
     def test_channel_management_logic(self):
         """Test channel management logic."""
         # Mock restricted channels list
-        restricted_channels = [1184292134258479176, 743221934250131476]  # LOG_CHANNEL_ID, MESSAGE_LOGS_CHANNEL_ID
-        new_channel_id = 833446957955547206  # MEMBER_LOGS_CHANNEL_ID
+        restricted_channels = [int(os.getenv('LOG_CHANNEL_ID', '1184292134258479176')), int(os.getenv('MESSAGE_LOGS_CHANNEL_ID', '743221934250131476'))]  # LOG_CHANNEL_ID, MESSAGE_LOGS_CHANNEL_ID
+        new_channel_id = int(os.getenv('MEMBER_LOGS_CHANNEL_ID', '833446957955547206'))  # MEMBER_LOGS_CHANNEL_ID
         
         # Test adding new channel
         if new_channel_id not in restricted_channels:
@@ -53,7 +53,7 @@ class TestModCommandUtilities:
         assert len(restricted_channels) == 3
         
         # Test adding existing channel
-        existing_channel_id = 1184292134258479176  # LOG_CHANNEL_ID (already in list)
+        existing_channel_id = int(os.getenv('LOG_CHANNEL_ID', '1184292134258479176'))  # LOG_CHANNEL_ID (already in list)
         if existing_channel_id not in restricted_channels:
             restricted_channels.append(existing_channel_id)
         

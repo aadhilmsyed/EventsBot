@@ -37,15 +37,15 @@ class TestMemberCommandUtilities:
     
     def test_role_hierarchy_logic(self):
         """Test role hierarchy checking logic."""
-        # Mock role IDs (from .env file)
-        moderator_role_id = 766386531681435678
-        captain_role_id = 1316559380782645278
-        first_officer_role_id = 948366879980937297
-        first_class_role_id = 989232534313369630
-        business_class_role_id = 1110680241569017966
-        premium_economy_role_id = 1110680332879011882
-        economy_class_role_id = 1112981412191146004
-        server_booster_role_id = 786291409061150729
+        # Mock role IDs (from environment variables)
+        moderator_role_id = int(os.getenv('MODERATOR_ROLE_ID', '766386531681435678'))
+        captain_role_id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
+        first_officer_role_id = int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))
+        first_class_role_id = int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))
+        business_class_role_id = int(os.getenv('BUSINESS_CLASS_ROLE_ID', '1110680241569017966'))
+        premium_economy_role_id = int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882'))
+        economy_class_role_id = int(os.getenv('ECONOMY_CLASS_ROLE_ID', '1112981412191146004'))
+        server_booster_role_id = int(os.getenv('SERVER_BOOSTER_ROLE_ID', '786291409061150729'))
         
         # Test role hierarchy
         user_roles = [premium_economy_role_id]
@@ -69,15 +69,15 @@ class TestMemberCommandUtilities:
     
     def test_blacklist_check_logic(self):
         """Test blacklist checking logic."""
-        blacklist = ["1316559380782645278", "948366879980937297"]
-        user_id = "1316559380782645278"
+        blacklist = [os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'), os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297')]
+        user_id = os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278')
         
         # Test blacklisted user
         is_blacklisted = str(user_id) in blacklist
         assert is_blacklisted == True
         
         # Test non-blacklisted user
-        user_id = "989232534313369630"
+        user_id = os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630')
         is_blacklisted = str(user_id) in blacklist
         assert is_blacklisted == False
     

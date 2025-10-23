@@ -10,15 +10,15 @@ class TestHelpUtilities:
     
     def test_role_permission_checking(self):
         """Test role permission checking logic."""
-        # Mock role IDs (from .env file)
-        economy_class_role_id = 1112981412191146004
-        premium_economy_role_id = 1110680332879011882
-        business_class_role_id = 1110680241569017966
-        first_class_role_id = 989232534313369630
-        first_officer_role_id = 948366879980937297
-        captain_role_id = 1316559380782645278
-        moderator_role_id = 766386531681435678
-        server_booster_role_id = 786291409061150729
+        # Mock role IDs (from environment variables)
+        economy_class_role_id = int(os.getenv('ECONOMY_CLASS_ROLE_ID', '1112981412191146004'))
+        premium_economy_role_id = int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882'))
+        business_class_role_id = int(os.getenv('BUSINESS_CLASS_ROLE_ID', '1110680241569017966'))
+        first_class_role_id = int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))
+        first_officer_role_id = int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))
+        captain_role_id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
+        moderator_role_id = int(os.getenv('MODERATOR_ROLE_ID', '766386531681435678'))
+        server_booster_role_id = int(os.getenv('SERVER_BOOSTER_ROLE_ID', '786291409061150729'))
         
         # Test basic user (economy class only)
         user_roles = [economy_class_role_id]
@@ -67,14 +67,14 @@ class TestHelpUtilities:
     def test_command_availability_logic(self):
         """Test command availability logic."""
         def get_available_commands(user_roles):
-            economy_class_role_id = 1112981412191146004
-            premium_economy_role_id = 1110680332879011882
-            business_class_role_id = 1110680241569017966
-            first_class_role_id = 989232534313369630
-            first_officer_role_id = 948366879980937297
-            captain_role_id = 1316559380782645278
-            moderator_role_id = 766386531681435678
-            server_booster_role_id = 786291409061150729
+            economy_class_role_id = int(os.getenv('ECONOMY_CLASS_ROLE_ID', '1112981412191146004'))
+            premium_economy_role_id = int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882'))
+            business_class_role_id = int(os.getenv('BUSINESS_CLASS_ROLE_ID', '1110680241569017966'))
+            first_class_role_id = int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))
+            first_officer_role_id = int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))
+            captain_role_id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
+            moderator_role_id = int(os.getenv('MODERATOR_ROLE_ID', '766386531681435678'))
+            server_booster_role_id = int(os.getenv('SERVER_BOOSTER_ROLE_ID', '786291409061150729'))
             
             is_premium_economy = premium_economy_role_id in user_roles
             is_business_class = business_class_role_id in user_roles
@@ -101,25 +101,25 @@ class TestHelpUtilities:
             return commands
         
         # Test economy class user
-        economy_roles = [1112981412191146004]
+        economy_roles = [int(os.getenv('ECONOMY_CLASS_ROLE_ID', '1112981412191146004'))]
         economy_commands = get_available_commands(economy_roles)
         expected_economy = ["ping", "quack", "help", "metar", "atis", "flighttime", "leaderboard"]
         assert set(economy_commands) == set(expected_economy)
         
         # Test premium economy user
-        premium_roles = [1110680332879011882]
+        premium_roles = [int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882'))]
         premium_commands = get_available_commands(premium_roles)
         expected_premium = expected_economy + ["dotspam"]
         assert set(premium_commands) == set(expected_premium)
         
         # Test business class user
-        business_roles = [1110680241569017966]
+        business_roles = [int(os.getenv('BUSINESS_CLASS_ROLE_ID', '1110680241569017966'))]
         business_commands = get_available_commands(business_roles)
         expected_business = expected_premium + ["echo"]
         assert set(business_commands) == set(expected_business)
         
         # Test first class user
-        first_class_roles = [989232534313369630]
+        first_class_roles = [int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))]
         first_class_commands = get_available_commands(first_class_roles)
         expected_first_class = expected_business + ["spam"]
         assert set(first_class_commands) == set(expected_first_class)
@@ -127,8 +127,8 @@ class TestHelpUtilities:
     def test_mod_help_permission_logic(self):
         """Test mod help permission logic."""
         def can_access_mod_help(user_roles):
-            first_officer_role_id = 948366879980937297
-            captain_role_id = 1316559380782645278
+            first_officer_role_id = int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))
+            captain_role_id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
             
             is_first_officer = first_officer_role_id in user_roles
             is_captain = captain_role_id in user_roles
@@ -136,33 +136,33 @@ class TestHelpUtilities:
             return is_first_officer or is_captain
         
         # Test first officer access
-        first_officer_roles = [948366879980937297]
+        first_officer_roles = [int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))]
         assert can_access_mod_help(first_officer_roles) == True
         
         # Test captain access
-        captain_roles = [1316559380782645278]
+        captain_roles = [int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))]
         assert can_access_mod_help(captain_roles) == True
         
         # Test insufficient access
-        other_roles = [989232534313369630]  # First class
+        other_roles = [int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))]  # First class
         assert can_access_mod_help(other_roles) == False
     
     def test_admin_help_permission_logic(self):
         """Test admin help permission logic."""
         def can_access_admin_help(user_roles):
-            captain_role_id = 1316559380782645278
+            captain_role_id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
             return captain_role_id in user_roles
         
         # Test captain access
-        captain_roles = [1316559380782645278]
+        captain_roles = [int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))]
         assert can_access_admin_help(captain_roles) == True
         
         # Test insufficient access
-        other_roles = [948366879980937297]  # First officer
+        other_roles = [int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))]  # First officer
         assert can_access_admin_help(other_roles) == False
         
         # Test insufficient access
-        other_roles = [989232534313369630]  # First class
+        other_roles = [int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))]  # First class
         assert can_access_admin_help(other_roles) == False
     
     def test_embed_field_generation_logic(self):
