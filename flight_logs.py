@@ -1,18 +1,17 @@
 # Import Discord Python Libraries
+# Import Other Necessary Libraries
+from datetime import datetime as time
+
 import discord
+import pytz
 from discord.enums import EventStatus
 from discord.ext import commands, tasks
 
 # Import Bot & Logger Objects
 from bot import bot
-from logger import logger
-
 # Import Necessary Local Files
 from config import config, flight_hours_manager
-
-# Import Other Necessary Libraries
-from datetime import datetime as time
-import pytz
+from logger import logger
 
 
 @bot.event

@@ -1,18 +1,16 @@
 # Import Discord Python Libraries
+import time
+# Import Other External Libraries
+from random import randrange
+
 import discord
 from discord.ext import commands
 
 # Import Bot & Logger Objects
 from bot import bot
-from logger import logger
-
 # Import Necessary Local Files
 from config import config, flight_hours_manager
-
-# Import Other External Libraries
-from random import randrange
-from discord.ext import commands
-import time
+from logger import logger
 
 
 @bot.command()

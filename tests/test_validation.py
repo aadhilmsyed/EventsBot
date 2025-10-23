@@ -2,19 +2,16 @@
 Tests for validation.py module.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
-from validation import (
-    sanitize_event_name,
-    validate_flight_time,
-    validate_member_id,
-    sanitize_message,
-    validate_icao_code,
-)
+
+from validation import (sanitize_event_name, sanitize_message,
+                        validate_flight_time, validate_icao_code,
+                        validate_member_id)
 
 
 class TestSanitizeEventName:

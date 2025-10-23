@@ -1,7 +1,8 @@
 # Get the Token from the OS environment
 import os
-import dotenv
 import sys
+
+import dotenv
 
 dotenv.load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -22,30 +23,24 @@ from discord.ext import commands
 # Import Bot & Logger Objects
 from bot import bot
 from config import config
-from logger import logger
-
-# Import Member Commands
-from help import help, mod_help, admin_help
-from metar import metar, atis
-from member_commands import flighttime, leaderboard
-from member_commands import view_event_history, view_member_history
-from member_commands import on_message_delete, on_reaction_remove
-from member_commands import dotspam, ping, quack, echo, spam
-
-# Import Moderator Commands
-from mod_commands import restrict, unrestrict, view_restricted_channels
-from mod_commands import add_event_vc, remove_event_vc, view_event_vc
-from mod_commands import add_flight_time, remove_flight_time, view_flight_time
-from mod_commands import blacklist, whitelist, view_blacklist
-from mod_commands import (
-    add_event_attendance,
-    remove_event_attendance,
-    view_event_attendance,
-)
-
 # Import Flight Logging
 from flight_logs import on_scheduled_event_update, on_voice_state_update
-from monthly_roles import update_roles, clear_flight_logs
+# Import Member Commands
+from help import admin_help, help, mod_help
+from logger import logger
+from member_commands import (dotspam, echo, flighttime, leaderboard,
+                             on_message_delete, on_reaction_remove, ping,
+                             quack, spam, view_event_history,
+                             view_member_history)
+from metar import atis, metar
+# Import Moderator Commands
+from mod_commands import (add_event_attendance, add_event_vc, add_flight_time,
+                          blacklist, remove_event_attendance, remove_event_vc,
+                          remove_flight_time, restrict, unrestrict,
+                          view_blacklist, view_event_attendance, view_event_vc,
+                          view_flight_time, view_restricted_channels,
+                          whitelist)
+from monthly_roles import clear_flight_logs, update_roles
 
 # Start the Bot
 bot.run(TOKEN)

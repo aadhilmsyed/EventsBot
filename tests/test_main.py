@@ -3,12 +3,13 @@ Integration tests for main.py - Tests bot startup and basic command functionalit
 This test requires a valid Discord bot token and will actually connect to Discord.
 """
 
-import pytest
 import asyncio
 import os
 import sys
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import discord
+import pytest
 from discord.ext import commands
 
 

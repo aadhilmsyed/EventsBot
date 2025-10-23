@@ -2,8 +2,9 @@
 Pytest configuration and fixtures for EventsBot tests - Unit tests only.
 """
 
-import pytest
 import os
+
+import pytest
 
 # Set up test environment variables from .env file - NO FALLBACKS
 os.environ["DISCORD_TOKEN"] = os.getenv("DISCORD_TOKEN")

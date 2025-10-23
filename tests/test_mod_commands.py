@@ -2,9 +2,10 @@
 Unit tests for mod_commands.py module - Pure function tests only.
 """
 
-import pytest
 import os
 from unittest.mock import patch
+
+import pytest
 
 
 class TestModCommandUtilities:

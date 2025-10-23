@@ -1,19 +1,18 @@
 # Import Discord Python Libraries
+import asyncio
+import csv
+# Import Other Necessary Libraries
+import datetime
+import json
+
 import discord
 from discord.ext import commands
 
 # Import Bot & Logger Objects
 from bot import bot
-from logger import logger
-
 # Import from Local Files
-from config import flight_hours_manager, config
-
-# Import Other Necessary Libraries
-import datetime
-import json
-import csv
-import asyncio
+from config import config, flight_hours_manager
+from logger import logger
 
 
 def calculate_earned_role(minutes):

@@ -4,8 +4,8 @@ from discord.ext import commands
 
 # Import Bot & Logger Objects
 from bot import bot
-from logger import logger
 from config import config
+from logger import logger
 
 
 @bot.command()

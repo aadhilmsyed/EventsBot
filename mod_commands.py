@@ -1,20 +1,20 @@
 # Import Discord Python Libraries
+import datetime
+import io
+from datetime import timedelta
+
 import discord
+# Import Other Necessary Libraries
+import pandas as pd
 from discord.ext import commands
 
 # Import Bot & Logger Objects
 from bot import bot
-from logger import logger
-
 # Import Necessary Local Files
 from config import config, flight_hours_manager
-from validation import sanitize_event_name, validate_flight_time, validate_member_id
-
-# Import Other Necessary Libraries
-import pandas as pd
-import io
-import datetime
-from datetime import timedelta
+from logger import logger
+from validation import (sanitize_event_name, validate_flight_time,
+                        validate_member_id)
 
 
 @bot.command()

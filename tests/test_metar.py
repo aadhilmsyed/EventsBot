@@ -2,8 +2,9 @@
 Unit tests for metar.py module - Pure function tests only.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestMetarUtilities:

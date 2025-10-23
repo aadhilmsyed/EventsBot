@@ -1,7 +1,7 @@
 # Input validation and sanitization utilities
 
-import re
 import html
+import re
 
 
 def sanitize_event_name(event_name: str) -> str:
