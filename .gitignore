@@ -55,10 +55,10 @@ tmp/
 *.bak
 *.old
 
-# Test files
-test_*.py
-*_test.py
-tests/
+# Test files (keeping test suite in repo)
+# test_*.py
+# *_test.py
+# tests/
 
 # Coverage reports
 htmlcov/

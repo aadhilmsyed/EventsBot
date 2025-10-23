@@ -1,27 +1,169 @@
-name: Test Events CoPilot
+name: EventsBot CI/CD
 
 on:
   push:
-    branches:
-      - main  # Replace with your main branch name
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run tests
-      run: python3 -m unittest tests.test_events_bot
+    - name: Set up test environment variables
+      run: |
+        echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> $GITHUB_ENV
+        echo "GUILD_ID=553718744233541656" >> $GITHUB_ENV
+        echo "LOG_CHANNEL_ID=1184292134258479176" >> $GITHUB_ENV
+        echo "MODERATOR_ROLE_ID=766386531681435678" >> $GITHUB_ENV
+        echo "CAPTAIN_ROLE_ID=1316559380782645278" >> $GITHUB_ENV
+        echo "FIRST_OFFICER_ROLE_ID=948366879980937297" >> $GITHUB_ENV
+        echo "FIRST_CLASS_ROLE_ID=989232534313369630" >> $GITHUB_ENV
+        echo "BUSINESS_CLASS_ROLE_ID=1110680241569017966" >> $GITHUB_ENV
+        echo "PREMIUM_ECONOMY_ROLE_ID=1110680332879011882" >> $GITHUB_ENV
+        echo "ECONOMY_CLASS_ROLE_ID=1112981412191146004" >> $GITHUB_ENV
+        echo "SERVER_BOOSTER_ROLE_ID=786291409061150729" >> $GITHUB_ENV
+
+    - name: Run unit tests with pytest
+      run: |
+        pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing --tb=short -m "not integration"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  integration-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set up integration test environment variables
+      run: |
+        echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> $GITHUB_ENV
+        echo "GUILD_ID=553718744233541656" >> $GITHUB_ENV
+        echo "LOG_CHANNEL_ID=1184292134258479176" >> $GITHUB_ENV
+        echo "MODERATOR_ROLE_ID=766386531681435678" >> $GITHUB_ENV
+        echo "CAPTAIN_ROLE_ID=1316559380782645278" >> $GITHUB_ENV
+        echo "FIRST_OFFICER_ROLE_ID=948366879980937297" >> $GITHUB_ENV
+        echo "FIRST_CLASS_ROLE_ID=989232534313369630" >> $GITHUB_ENV
+        echo "BUSINESS_CLASS_ROLE_ID=1110680241569017966" >> $GITHUB_ENV
+        echo "PREMIUM_ECONOMY_ROLE_ID=1110680332879011882" >> $GITHUB_ENV
+        echo "ECONOMY_CLASS_ROLE_ID=1112981412191146004" >> $GITHUB_ENV
+        echo "SERVER_BOOSTER_ROLE_ID=786291409061150729" >> $GITHUB_ENV
+
+    - name: Run integration tests
+      if: env.DISCORD_TOKEN != '' && env.DISCORD_TOKEN != '${{ secrets.DISCORD_TOKEN }}'
+      run: |
+        pytest tests/test_main.py -v --tb=short -m integration
+      timeout-minutes: 10
+
+    - name: Skip integration tests (no token)
+      if: env.DISCORD_TOKEN == '' || env.DISCORD_TOKEN == '${{ secrets.DISCORD_TOKEN }}'
+      run: |
+        echo "⚠️ Skipping integration tests - DISCORD_TOKEN secret not provided"
+        echo "To enable integration tests, add DISCORD_TOKEN to repository secrets"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install linting dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+
+    - name: Run black formatter check
+      run: black --check --diff .
+
+    - name: Run isort import sorting check
+      run: isort --check-only --diff .
+
+    - name: Run flake8 linter
+      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install security dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run bandit security linter
+      run: bandit -r . -f json -o bandit-report.json || true
+
+    - name: Run safety check
+      run: safety check --json --output safety-report.json || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
 
