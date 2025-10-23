@@ -76,5 +76,5 @@ For contributions, please message `the._.pickle` on Discord.
 
 This source code is provided solely for the purpose of running the GeoFS Events CoPilot Discord Bot in the context of the [GeoFS Events Discord Server](https://discord.gg/nCWhNgN). Any use, reproduction, modification, or distribution of this source code for other projects or purposes is strictly prohibited.
 
-© GeoFS Flights Channel 2023. All Rights Reserved.
+© GeoFS Flights Channel 2025. All Rights Reserved.
 
