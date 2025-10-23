@@ -578,6 +578,7 @@ async def add_event(ctx, *, event_name: str):
         # Add the event to the event history
         flight_hours_manager.event_history[sanitized_event_name] = set()
         await ctx.send(f"Event '{sanitized_event_name}' was successfully added to the event history database.")
+        await logger.info(f"Event '{sanitized_event_name}' was added to the event history database by {ctx.message.author.mention}")
         
         # Export the updated data back to the file
         flight_hours_manager.save(); return
