@@ -191,13 +191,9 @@ class FlightHours:
                 return False
         
         with self._lock:
-            # Add the member to the start time dictionary and the member history dictionary
-            if member_id_str not in self.start_time: self.start_time[member_id_str] = time.now(pytz.utc)
-            if member_id_str not in self.member_history: self.member_history[member_id_str] = set()
-            
-            # Add the member to the event history and the member to the event history
-            self.event_history[self.active_event].add(member_id_str)
-            self.member_history[member_id_str].add(self.active_event)
+            # Only track the start time - don't add to history yet
+            if member_id_str not in self.start_time: 
+                self.start_time[member_id_str] = time.now(pytz.utc)
         
         return True  # Successfully logged
         
@@ -234,17 +230,28 @@ class FlightHours:
                 elif minutes_flown > 1440:  # More than 24 hours
                     minutes_flown = 1440
                 
-                # If the member is not in the flight hours dictionary, add them to it
-                if member_id_str not in self.flight_hours: self.flight_hours[member_id_str] = 0
+                # Check if member stayed for more than 5 minutes
+                if minutes_flown >= 5:
+                    # Add to history only if they stayed for 5+ minutes
+                    if member_id_str not in self.member_history: 
+                        self.member_history[member_id_str] = set()
+                    
+                    # Add the member to the event history and the event to member history
+                    self.event_history[self.active_event].add(member_id_str)
+                    self.member_history[member_id_str].add(self.active_event)
+                    
+                    # If the member is not in the flight hours dictionary, add them to it
+                    if member_id_str not in self.flight_hours: 
+                        self.flight_hours[member_id_str] = 0
+                    
+                    # Add the elapsed minutes to the total flight hours for the member
+                    self.flight_hours[member_id_str] += minutes_flown
+                    
+                    # Validate total flight hours (prevent excessive accumulation)
+                    if self.flight_hours[member_id_str] > 10080:  # More than a week
+                        self.flight_hours[member_id_str] = 10080
                 
-                # Add the elapsed minutes to the total flight hours for the member
-                self.flight_hours[member_id_str] += minutes_flown
-                
-                # Validate total flight hours (prevent excessive accumulation)
-                if self.flight_hours[member_id_str] > 10080:  # More than a week
-                    self.flight_hours[member_id_str] = 10080
-                
-                # Remove the start time entry for the member
+                # Remove the start time entry for the member regardless of duration
                 del self.start_time[member_id_str]
                 
                 # Return the minutes flown
