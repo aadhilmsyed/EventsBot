@@ -87,8 +87,8 @@ class TestMainIntegration:
             
             # Test actual command execution by sending a real message to Discord
             # Get the test guild and channel
-            guild_id = int(os.getenv('GUILD_ID', '553718744233541656'))
-            channel_id = int(os.getenv('LOG_CHANNEL_ID', '1184292134258479176'))
+            guild_id = int(os.getenv('GUILD_ID'))
+            channel_id = int(os.getenv('LOG_CHANNEL_ID'))
             
             guild = test_bot.get_guild(guild_id)
             assert guild is not None, f"Could not find guild with ID {guild_id}"
@@ -101,7 +101,7 @@ class TestMainIntegration:
             mock_message = MagicMock()
             mock_message.content = "!ping"
             mock_message.author = MagicMock()
-            mock_message.author.id = int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))
+            mock_message.author.id = int(os.getenv('CAPTAIN_ROLE_ID'))
             mock_message.author.bot = False
             mock_message.channel = channel
             mock_message.guild = guild

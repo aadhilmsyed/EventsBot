@@ -13,13 +13,13 @@ class TestMonthlyRolesUtilities:
         """Test the calculate_earned_role function."""
         # Mock role thresholds (from environment variables)
         roles = {
-            int(os.getenv('MODERATOR_ROLE_ID', '766386531681435678')): 1,  # Moderator - 1 hour
-            int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278')): 2,  # Captain - 2 hours
-            int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297')): 3,  # First Officer - 3 hours
-            int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630')): 4,  # First Class - 4 hours
-            int(os.getenv('BUSINESS_CLASS_ROLE_ID', '1110680241569017966')): 5,  # Business Class - 5 hours
-            int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882')): 6,  # Premium Economy - 6 hours
-            int(os.getenv('ECONOMY_CLASS_ROLE_ID', '1112981412191146004')): 7,  # Economy Class - 7 hours
+            int(os.getenv('MODERATOR_ROLE_ID')): 1,  # Moderator - 1 hour
+            int(os.getenv('CAPTAIN_ROLE_ID')): 2,  # Captain - 2 hours
+            int(os.getenv('FIRST_OFFICER_ROLE_ID')): 3,  # First Officer - 3 hours
+            int(os.getenv('FIRST_CLASS_ROLE_ID')): 4,  # First Class - 4 hours
+            int(os.getenv('BUSINESS_CLASS_ROLE_ID')): 5,  # Business Class - 5 hours
+            int(os.getenv('PREMIUM_ECONOMY_ROLE_ID')): 6,  # Premium Economy - 6 hours
+            int(os.getenv('ECONOMY_CLASS_ROLE_ID')): 7,  # Economy Class - 7 hours
         }
         
         # Test calculate_earned_role function logic
@@ -42,12 +42,12 @@ class TestMonthlyRolesUtilities:
         
         # Test cases
         assert calculate_earned_role(0) is None  # No time
-        assert calculate_earned_role(30) == int(os.getenv('MODERATOR_ROLE_ID', '766386531681435678'))  # 0.5 hours + 1 grace = 1 hour (Moderator)
-        assert calculate_earned_role(60) == int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))  # 1 hour + 1 grace = 2 hours (Captain)
-        assert calculate_earned_role(90) == int(os.getenv('CAPTAIN_ROLE_ID', '1316559380782645278'))  # 1.5 hours + 1 grace = 2.5 hours (Captain)
-        assert calculate_earned_role(120) == int(os.getenv('FIRST_OFFICER_ROLE_ID', '948366879980937297'))  # 2 hours + 1 grace = 3 hours (First Officer)
-        assert calculate_earned_role(180) == int(os.getenv('FIRST_CLASS_ROLE_ID', '989232534313369630'))  # 3 hours + 1 grace = 4 hours (First Class)
-        assert calculate_earned_role(300) == int(os.getenv('PREMIUM_ECONOMY_ROLE_ID', '1110680332879011882'))  # 5 hours + 1 grace = 6 hours (Premium Economy)
+        assert calculate_earned_role(30) == int(os.getenv('MODERATOR_ROLE_ID'))  # 0.5 hours + 1 grace = 1 hour (Moderator)
+        assert calculate_earned_role(60) == int(os.getenv('CAPTAIN_ROLE_ID'))  # 1 hour + 1 grace = 2 hours (Captain)
+        assert calculate_earned_role(90) == int(os.getenv('CAPTAIN_ROLE_ID'))  # 1.5 hours + 1 grace = 2.5 hours (Captain)
+        assert calculate_earned_role(120) == int(os.getenv('FIRST_OFFICER_ROLE_ID'))  # 2 hours + 1 grace = 3 hours (First Officer)
+        assert calculate_earned_role(180) == int(os.getenv('FIRST_CLASS_ROLE_ID'))  # 3 hours + 1 grace = 4 hours (First Class)
+        assert calculate_earned_role(300) == int(os.getenv('PREMIUM_ECONOMY_ROLE_ID'))  # 5 hours + 1 grace = 6 hours (Premium Economy)
     
     def test_role_threshold_sorting(self):
         """Test role threshold sorting logic."""
