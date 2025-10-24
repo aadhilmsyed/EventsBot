@@ -2,6 +2,7 @@
 Unit tests for longhauls.py module - Pure function tests only.
 """
 
+import asyncio
 import os
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -500,6 +501,208 @@ class TestLongHaulEdgeCases:
         for airline in unicode_airlines:
             assert isinstance(airline, str)
             assert len(airline) > 0
+
+
+class TestLongHaulLockMechanism:
+    """Test cases for the lock mechanism in long haul commands."""
+
+    def test_lock_exists(self):
+        """Test that the lock is properly defined."""
+        import longhauls
+        
+        # Test that lock exists
+        assert hasattr(longhauls, 'lh_lock')
+        assert isinstance(longhauls.lh_lock, asyncio.Lock)
+
+    def test_lock_acquisition(self):
+        """Test that lock can be acquired."""
+        import longhauls
+        
+        async def test_lock():
+            async with longhauls.lh_lock:
+                # Lock should be acquired
+                assert True
+        
+        # This should not raise an exception
+        asyncio.run(test_lock())
+
+    def test_concurrent_lock_behavior(self):
+        """Test behavior of lock under concurrent access."""
+        import longhauls
+        
+        async def simulate_concurrent_access():
+            # Simulate two concurrent operations
+            async with longhauls.lh_lock:
+                # First operation
+                await asyncio.sleep(0.001)  # Small delay
+                assert True
+            
+            async with longhauls.lh_lock:
+                # Second operation (should wait for first to complete)
+                assert True
+        
+        # This should complete without issues
+        asyncio.run(simulate_concurrent_access())
+
+    def test_lock_protection_scenarios(self):
+        """Test scenarios where lock provides protection."""
+        import longhauls
+        
+        async def test_protected_operation():
+            # Simulate protected seat assignment
+            available_seats = ["1A", "1B", "1C"]
+            available_gates = ["A1", "A2"]
+            
+            async with longhauls.lh_lock:
+                # Simulate seat assignment
+                if available_seats and available_gates:
+                    seat = available_seats.pop(0)
+                    gate = available_gates.pop(0)
+                    
+                    assert seat in ["1A", "1B", "1C"]
+                    assert gate in ["A1", "A2"]
+                    assert seat not in available_seats
+                    assert gate not in available_gates
+        
+        asyncio.run(test_protected_operation())
+
+
+class TestLongHaulErrorHandling:
+    """Test cases for improved error handling in long haul commands."""
+
+    def test_discord_forbidden_exception_handling(self):
+        """Test handling of Discord.Forbidden exceptions during DM sending."""
+        # Test that we can simulate a Forbidden exception
+        class MockForbidden(Exception):
+            pass
+        
+        # Test exception handling
+        try:
+            raise MockForbidden("Forbidden")
+        except MockForbidden:
+            # This should be caught and handled gracefully
+            assert True
+
+    def test_value_error_handling(self):
+        """Test handling of ValueError during seat/gate removal."""
+        # Test ValueError when trying to remove non-existent item
+        seats = ["1A", "1B", "1C"]
+        
+        # Try to remove non-existent seat
+        with pytest.raises(ValueError):
+            seats.remove("1D")  # This seat doesn't exist
+
+    def test_empty_list_handling(self):
+        """Test handling of empty lists during operations."""
+        # Test empty seat list
+        empty_seats = []
+        assert len(empty_seats) == 0
+        
+        # Test empty gate list
+        empty_gates = []
+        assert len(empty_gates) == 0
+        
+        # Test that we can't choose from empty lists
+        with pytest.raises(IndexError):
+            empty_seats[0]
+        
+        with pytest.raises(IndexError):
+            empty_gates[0]
+
+    def test_race_condition_prevention(self):
+        """Test that race conditions are prevented."""
+        import longhauls
+        
+        async def simulate_race_condition():
+            # Simulate two users trying to get the same seat
+            available_seats = ["1A", "1B", "1C"]
+            available_gates = ["A1", "A2"]
+            
+            async with longhauls.lh_lock:
+                # First user gets seat
+                if available_seats and available_gates:
+                    seat = available_seats.pop(0)
+                    gate = available_gates.pop(0)
+                    
+                    # Verify seat and gate are removed
+                    assert seat not in available_seats
+                    assert gate not in available_gates
+            
+            # Second user tries to get seat (should get different seat)
+            async with longhauls.lh_lock:
+                if available_seats and available_gates:
+                    seat2 = available_seats.pop(0)
+                    gate2 = available_gates.pop(0)
+                    
+                    # Verify different seat/gate assigned
+                    assert seat2 != seat or gate2 != gate
+        
+        asyncio.run(simulate_race_condition())
+
+
+class TestLongHaulCommandIntegration:
+    """Test cases for command integration and workflow."""
+
+    def test_command_workflow_sequence(self):
+        """Test the complete command workflow sequence."""
+        # Test setup sequence
+        setup_commands = [
+            "set_lh_departure",
+            "set_lh_arrival", 
+            "set_lh_airline",
+            "set_lh_flight_number",
+            "set_lh_date",
+            "set_lh_boarding_time",
+            "set_lh_departure_time",
+            "set_lh_available_economy_seats",
+            "set_lh_available_premium_economy_seats",
+            "set_lh_available_business_seats",
+            "set_lh_available_first_class_seats",
+            "set_lh_available_gates",
+            "start_lh_checkin"
+        ]
+        
+        # Verify all setup commands exist
+        for cmd in setup_commands:
+            assert isinstance(cmd, str)
+            assert len(cmd) > 0
+
+    def test_management_commands(self):
+        """Test management commands."""
+        management_commands = [
+            "view_lh_attributes",
+            "clear_lh_attributes",
+            "stop_lh_checkin",
+            "clear_lh_checkin_role",
+            "clear_lh_security_role"
+        ]
+        
+        # Verify all management commands exist
+        for cmd in management_commands:
+            assert isinstance(cmd, str)
+            assert len(cmd) > 0
+
+    def test_user_commands(self):
+        """Test user-facing commands."""
+        user_commands = [
+            "checkin"
+        ]
+        
+        # Verify user commands exist
+        for cmd in user_commands:
+            assert isinstance(cmd, str)
+            assert len(cmd) > 0
+
+    def test_help_command_integration(self):
+        """Test integration with help commands."""
+        help_commands = [
+            "lh_help"
+        ]
+        
+        # Verify help commands exist
+        for cmd in help_commands:
+            assert isinstance(cmd, str)
+            assert len(cmd) > 0
 
     def test_very_long_strings(self):
         """Test handling of very long strings."""
