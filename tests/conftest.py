@@ -18,6 +18,8 @@ os.environ["BUSINESS_CLASS_ROLE_ID"] = os.getenv("BUSINESS_CLASS_ROLE_ID")
 os.environ["PREMIUM_ECONOMY_ROLE_ID"] = os.getenv("PREMIUM_ECONOMY_ROLE_ID")
 os.environ["ECONOMY_CLASS_ROLE_ID"] = os.getenv("ECONOMY_CLASS_ROLE_ID")
 os.environ["SERVER_BOOSTER_ROLE_ID"] = os.getenv("SERVER_BOOSTER_ROLE_ID")
+os.environ["LH_MH_CHECKIN_ROLE_ID"] = os.getenv("LH_MH_CHECKIN_ROLE_ID")
+os.environ["LH_MH_SECURITY_ROLE_ID"] = os.getenv("LH_MH_SECURITY_ROLE_ID")
 
 
 @pytest.fixture
@@ -34,9 +36,26 @@ def mock_config():
         "premium_economy_role_id": int(os.getenv("PREMIUM_ECONOMY_ROLE_ID")),
         "economy_class_role_id": int(os.getenv("ECONOMY_CLASS_ROLE_ID")),
         "server_booster_role_id": int(os.getenv("SERVER_BOOSTER_ROLE_ID")),
+        "lh_mh_checkin_role_id": int(os.getenv("LH_MH_CHECKIN_ROLE_ID")),
+        "lh_mh_security_role_id": int(os.getenv("LH_MH_SECURITY_ROLE_ID")),
         "blacklist": [],
         "restricted_channels": [],
         "event_vc": [],
+        "lh_mh_attributes": {
+            "departure_airport": "N/A",
+            "arrival_airport": "N/A",
+            "airline": "N/A",
+            "flight_number": "N/A",
+            "date": "N/A",
+            "boarding_time": "N/A",
+            "departure_time": "N/A",
+            "available_economy_seats": [],
+            "available_premium_economy_seats": [],
+            "available_business_seats": [],
+            "available_first_class_seats": [],
+            "available_gates": [],
+        },
+        "checkin_start": False,
         "roles": {
             int(os.getenv("MODERATOR_ROLE_ID")): 1,  # Moderator
             int(os.getenv("CAPTAIN_ROLE_ID")): 2,  # Captain
