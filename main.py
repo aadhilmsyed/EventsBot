@@ -45,6 +45,27 @@ from member_commands import (
 )
 from metar import atis, metar
 
+# Import Long Haul Commands
+from longhauls import (
+    checkin,
+    clear_longhaul_attributes,
+    set_arrival,
+    set_available_business_seats,
+    set_available_economy_seats,
+    set_available_first_class_seats,
+    set_available_gates,
+    set_available_premium_economy_seats,
+    set_airline,
+    set_boarding_time,
+    set_date,
+    set_departure,
+    set_departure_time,
+    set_flight_number,
+    start_checkin,
+    stop_checkin,
+    view_longhaul_attributes,
+)
+
 # Import Moderator Commands
 from mod_commands import (
     add_event_attendance,
