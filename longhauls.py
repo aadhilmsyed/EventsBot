@@ -318,10 +318,51 @@ async def view_longhaul_attributes(ctx):
         return
 
     # View the current long haul event attributes
-    await ctx.send(f"Current long haul event attributes: {config.lh_mh_attributes}")
-    await logger.info(
-        f"Current long haul event attributes: {config.lh_mh_attributes} by {ctx.message.author.mention}"
-    )
+    attributes = config.lh_mh_attributes
+    
+    # Format the response nicely
+    response = "## Current Long Haul Event Attributes:\n"
+    response += f"- **Departure:** {attributes['departure_airport']}\n"
+    response += f"- **Arrival:** {attributes['arrival_airport']}\n"
+    response += f"- **Airline:** {attributes['airline']}\n"
+    response += f"- **Flight Number:** {attributes['flight_number']}\n"
+    response += f"- **Date:** {attributes['date']}\n"
+    response += f"- **Boarding Time:** {attributes['boarding_time']}\n"
+    response += f"- **Departure Time:** {attributes['departure_time']}\n"
+    
+    # Add seat information
+    response += f"\n**Seats Available:**\n"
+    response += f"- **Economy:** {len(attributes['available_economy_seats'])} seats\n"
+    response += f"- **Premium Economy:** {len(attributes['available_premium_economy_seats'])} seats\n"
+    response += f"- **Business:** {len(attributes['available_business_seats'])} seats\n"
+    response += f"- **First Class:** {len(attributes['available_first_class_seats'])} seats\n"
+    response += f"- **Gates:** {len(attributes['available_gates'])} gates\n"
+    
+    # Check if response is too long for Discord (2000 char limit)
+    if len(response) > 1900:  # Leave some buffer
+        # Send basic info first
+        basic_info = "**Current Long Haul Event Attributes:**\n"
+        basic_info += f"- **Departure:** {attributes['departure_airport']}\n"
+        basic_info += f"- **Arrival:** {attributes['arrival_airport']}\n"
+        basic_info += f"- **Airline:** {attributes['airline']}\n"
+        basic_info += f"- **Flight Number:** {attributes['flight_number']}\n"
+        basic_info += f"- **Date:** {attributes['date']}\n"
+        basic_info += f"- **Boarding Time:** {attributes['boarding_time']}\n"
+        basic_info += f"- **Departure Time:** {attributes['departure_time']}\n"
+        
+        await ctx.send(basic_info)
+        
+        # Send seat counts
+        seat_info = "**Seats Available:**\n"
+        seat_info += f"- **Economy:** {len(attributes['available_economy_seats'])} seats\n"
+        seat_info += f"- **Premium Economy:** {len(attributes['available_premium_economy_seats'])} seats\n"
+        seat_info += f"- **Business:** {len(attributes['available_business_seats'])} seats\n"
+        seat_info += f"- **First Class:** {len(attributes['available_first_class_seats'])} seats\n"
+        seat_info += f"- **Gates:** {len(attributes['available_gates'])} gates\n"
+        
+        await ctx.send(seat_info)
+    else:
+        await ctx.send(response)
 
     # Save the updated configuration
     config.save()

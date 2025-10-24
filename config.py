@@ -1,17 +1,17 @@
 # Import Discord Python Libraries
-import json
-import os
-import shutil
-import tempfile
-import threading
-from collections import OrderedDict
+import discord
+from discord.ext import commands
 
 # Import Other Necessary Libraries
 from datetime import datetime as time
 
-import discord
+import json
+import os
 import pytz
-from discord.ext import commands
+import shutil
+import tempfile
+import threading
+from collections import OrderedDict
 
 
 class Configurations:
@@ -71,15 +71,16 @@ class Configurations:
             raise ValueError("SERVER_BOOSTER_ROLE_ID environment variable is required!")
         self.server_booster_role_id = int(server_booster_role_id_str)
 
-        lh_mh_checking_in_role_id_str = os.getenv("LH_MH_CHECKIN_ROLE_ID")
-        if not lh_mh_checking_in_role_id_str:
+        lh_mh_checkin_role_id_str = os.getenv("LH_MH_CHECKIN_ROLE_ID")
+        if not lh_mh_checkin_role_id_str:
             raise ValueError("LH_MH_CHECKIN_ROLE_ID environment variable is required!")
-        self.lh_mh_checking_in_role_id = int(lh_mh_checking_in_role_id_str)
+        self.lh_mh_checkin_role_id = int(lh_mh_checkin_role_id_str)
 
         lh_mh_security_role_id_str = os.getenv("LH_MH_SECURITY_ROLE_ID")
         if not lh_mh_security_role_id_str:
             raise ValueError("LH_MH_SECURITY_ROLE_ID environment variable is required!")
         self.lh_mh_security_role_id = int(lh_mh_security_role_id_str)
+
 
         # Server and Log Channel
         self.guild = None
