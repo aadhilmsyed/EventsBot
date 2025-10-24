@@ -1,12 +1,11 @@
+import random
+
 import discord
 from discord.ext import commands
 
+from bot import bot
 from config import config
 from logger import logger
-
-from bot import bot
-
-import random
 
 """
 self.lh_mh_attributes = {
@@ -21,6 +20,7 @@ self.lh_mh_attributes = {
     "available_gates": [],
 }
 """
+
 
 @bot.command()
 async def set_departure(ctx, airport: str):
@@ -38,10 +38,13 @@ async def set_departure(ctx, airport: str):
     # Set the departure airport
     config.lh_mh_attributes["departure_airport"] = airport
     await ctx.send(f"Departure airport set to {airport}")
-    await logger.info(f"Departure airport set to {airport} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Departure airport set to {airport} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_arrival(ctx, airport: str):
@@ -59,10 +62,13 @@ async def set_arrival(ctx, airport: str):
     # Set the arrival airport
     config.lh_mh_attributes["arrival_airport"] = airport
     await ctx.send(f"Arrival airport set to {airport}")
-    await logger.info(f"Arrival airport set to {airport} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Arrival airport set to {airport} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_airline(ctx, airline: str):
@@ -85,6 +91,7 @@ async def set_airline(ctx, airline: str):
     # Save the updated configuration
     config.save()
 
+
 @bot.command()
 async def set_flight_number(ctx, flight_number: str):
     """
@@ -97,14 +104,17 @@ async def set_flight_number(ctx, flight_number: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the flight number
     config.lh_mh_attributes["flight_number"] = flight_number
     await ctx.send(f"Flight number set to {flight_number}")
-    await logger.info(f"Flight number set to {flight_number} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Flight number set to {flight_number} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_date(ctx, date: str):
@@ -118,7 +128,7 @@ async def set_date(ctx, date: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the date
     config.lh_mh_attributes["date"] = date
     await ctx.send(f"Date set to {date}")
@@ -126,6 +136,7 @@ async def set_date(ctx, date: str):
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_boarding_time(ctx, boarding_time: str):
@@ -139,14 +150,17 @@ async def set_boarding_time(ctx, boarding_time: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the boarding time
     config.lh_mh_attributes["boarding_time"] = boarding_time
     await ctx.send(f"Boarding time set to {boarding_time}")
-    await logger.info(f"Boarding time set to {boarding_time} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Boarding time set to {boarding_time} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_departure_time(ctx, departure_time: str):
@@ -160,14 +174,17 @@ async def set_departure_time(ctx, departure_time: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the departure time
     config.lh_mh_attributes["departure_time"] = departure_time
     await ctx.send(f"Departure time set to {departure_time}")
-    await logger.info(f"Departure time set to {departure_time} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Departure time set to {departure_time} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_available_economy_seats(ctx, *, seats: str):
@@ -181,14 +198,17 @@ async def set_available_economy_seats(ctx, *, seats: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the available economy seats
     config.lh_mh_attributes["available_economy_seats"] = seats.split(" ")
     await ctx.send(f"Available economy seats set to {seats}")
-    await logger.info(f"Available economy seats set to {seats} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Available economy seats set to {seats} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_available_premium_economy_seats(ctx, *, seats: str):
@@ -202,14 +222,17 @@ async def set_available_premium_economy_seats(ctx, *, seats: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the available premium economy seats
     config.lh_mh_attributes["available_premium_economy_seats"] = seats.split(" ")
     await ctx.send(f"Available premium economy seats set to {seats}")
-    await logger.info(f"Available premium economy seats set to {seats} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Available premium economy seats set to {seats} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_available_business_seats(ctx, *, seats: str):
@@ -223,14 +246,17 @@ async def set_available_business_seats(ctx, *, seats: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the available business seats
     config.lh_mh_attributes["available_business_seats"] = seats.split(" ")
     await ctx.send(f"Available business seats set to {seats}")
-    await logger.info(f"Available business seats set to {seats} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Available business seats set to {seats} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_available_first_class_seats(ctx, *, seats: str):
@@ -244,14 +270,17 @@ async def set_available_first_class_seats(ctx, *, seats: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the available first class seats
     config.lh_mh_attributes["available_first_class_seats"] = seats.split(" ")
     await ctx.send(f"Available first class seats set to {seats}")
-    await logger.info(f"Available first class seats set to {seats} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Available first class seats set to {seats} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def set_available_gates(ctx, *, gates: str):
@@ -265,7 +294,7 @@ async def set_available_gates(ctx, *, gates: str):
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # Set the available gates
     config.lh_mh_attributes["available_gates"] = gates.split(" ")
     await ctx.send(f"Available gates set to {gates}")
@@ -274,25 +303,29 @@ async def set_available_gates(ctx, *, gates: str):
     # Save the updated configuration
     config.save()
 
+
 @bot.command()
 async def view_longhaul_attributes(ctx):
     """
     Description:
         View the current long haul event attributes
-    """ 
+    """
 
     # Verify that the member is a first officer
     manager_role = config.guild.get_role(config.first_officer_role_id)
     if manager_role not in ctx.message.author.roles:
         await ctx.send("Your role is not high enough to use this command.")
         return
-        
+
     # View the current long haul event attributes
     await ctx.send(f"Current long haul event attributes: {config.lh_mh_attributes}")
-    await logger.info(f"Current long haul event attributes: {config.lh_mh_attributes} by {ctx.message.author.mention}")
+    await logger.info(
+        f"Current long haul event attributes: {config.lh_mh_attributes} by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def clear_longhaul_attributes(ctx):
@@ -317,10 +350,13 @@ async def clear_longhaul_attributes(ctx):
     config.lh_mh_attributes["available_gates"] = []
 
     await ctx.send("Long haul event attributes cleared")
-    await logger.info(f"Long haul event attributes cleared by {ctx.message.author.mention}")
+    await logger.info(
+        f"Long haul event attributes cleared by {ctx.message.author.mention}"
+    )
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def start_checkin(ctx):
@@ -342,22 +378,30 @@ async def start_checkin(ctx):
 
     # Verify that the departure airport is set
     if config.lh_mh_attributes["departure_airport"] == "N/A":
-        await ctx.send("Departure airport is not set. Please set the departure airport using !set_departure <airport>.")
+        await ctx.send(
+            "Departure airport is not set. Please set the departure airport using !set_departure <airport>."
+        )
         return
 
     # Verify that the arrival airport is set
     if config.lh_mh_attributes["arrival_airport"] == "N/A":
-        await ctx.send("Arrival airport is not set. Please set the arrival airport using !set_arrival <airport>.")
+        await ctx.send(
+            "Arrival airport is not set. Please set the arrival airport using !set_arrival <airport>."
+        )
         return
 
     # Verify that the airline is set
     if config.lh_mh_attributes["airline"] == "N/A":
-        await ctx.send("Airline is not set. Please set the airline using !set_airline <airline>.")
+        await ctx.send(
+            "Airline is not set. Please set the airline using !set_airline <airline>."
+        )
         return
 
     # Verify that the flight number is set
     if config.lh_mh_attributes["flight_number"] == "N/A":
-        await ctx.send("Flight number is not set. Please set the flight number using !set_flight_number <flight_number>.")
+        await ctx.send(
+            "Flight number is not set. Please set the flight number using !set_flight_number <flight_number>."
+        )
         return
 
     # Verify that the date is set
@@ -367,37 +411,51 @@ async def start_checkin(ctx):
 
     # Verify that the boarding time is set
     if config.lh_mh_attributes["boarding_time"] == "N/A":
-        await ctx.send("Boarding time is not set. Please set the boarding time using !set_boarding_time <boarding_time>.")
+        await ctx.send(
+            "Boarding time is not set. Please set the boarding time using !set_boarding_time <boarding_time>."
+        )
         return
 
     # Verify that the departure time is set
     if config.lh_mh_attributes["departure_time"] == "N/A":
-        await ctx.send("Departure time is not set. Please set the departure time using !set_departure_time <departure_time>.")
+        await ctx.send(
+            "Departure time is not set. Please set the departure time using !set_departure_time <departure_time>."
+        )
         return
 
     # Verify that the available seats are set
     if len(config.lh_mh_attributes["available_economy_seats"]) == 0:
-        await ctx.send("Available economy seats are not set. Please set the available economy seats using !set_available_economy_seats <seats>.")
+        await ctx.send(
+            "Available economy seats are not set. Please set the available economy seats using !set_available_economy_seats <seats>."
+        )
         return
 
     # Verify that the available premium economy seats are set
     if len(config.lh_mh_attributes["available_premium_economy_seats"]) == 0:
-        await ctx.send("Available premium economy seats are not set. Please set the available premium economy seats using !set_available_premium_economy_seats <seats>.")
+        await ctx.send(
+            "Available premium economy seats are not set. Please set the available premium economy seats using !set_available_premium_economy_seats <seats>."
+        )
         return
 
     # Verify that the available business seats are set
     if len(config.lh_mh_attributes["available_business_seats"]) == 0:
-        await ctx.send("Available business seats are not set. Please set the available business seats using !set_available_business_seats <seats>.")
+        await ctx.send(
+            "Available business seats are not set. Please set the available business seats using !set_available_business_seats <seats>."
+        )
         return
 
     # Verify that the available first class seats are set
     if len(config.lh_mh_attributes["available_first_class_seats"]) == 0:
-        await ctx.send("Available first class seats are not set. Please set the available first class seats using !set_available_first_class_seats <seats>.")
+        await ctx.send(
+            "Available first class seats are not set. Please set the available first class seats using !set_available_first_class_seats <seats>."
+        )
         return
 
     # Verify that the available gates are set
     if len(config.lh_mh_attributes["available_gates"]) == 0:
-        await ctx.send("Available gates are not set. Please set the available gates using the appropriate command.")
+        await ctx.send(
+            "Available gates are not set. Please set the available gates using the appropriate command."
+        )
         return
 
     # Start the check-in process
@@ -407,6 +465,7 @@ async def start_checkin(ctx):
 
     # Save the updated configuration
     config.save()
+
 
 @bot.command()
 async def stop_checkin(ctx):
@@ -434,6 +493,7 @@ async def stop_checkin(ctx):
     # Save the updated configuration
     config.save()
 
+
 @bot.command()
 async def checkin(ctx):
     """
@@ -445,7 +505,9 @@ async def checkin(ctx):
 
     # Verify that the check-in process is started
     if not config.checkin_start:
-        await ctx.send("Check-in process is not started. Please wait for the check-in process to start.")
+        await ctx.send(
+            "Check-in process is not started. Please wait for the check-in process to start."
+        )
         return
 
     # # Verify that the member is in the check-in channel
@@ -456,17 +518,25 @@ async def checkin(ctx):
     # Verify that the member is not already checked in
     checkin_role = config.guild.get_role(config.lh_mh_checkin_role_id)
     if checkin_role in ctx.message.author.roles:
-        await ctx.send("You are already checked in. Please wait for the next check-in process.")
+        await ctx.send(
+            "You are already checked in. Please wait for the next check-in process."
+        )
         return
-    
+
     # Get the name, id, class, avatar, and color of the member
     name = ctx.message.author.display_name
     rewards_id = ctx.message.author.id
     class_name = "Economy Class"
     for role in ctx.message.author.roles:
-        if role.id == config.first_class_role_id: class_name = "First Class"; break;
-        elif role.id == config.business_class_role_id: class_name = "Business Class"; break;
-        elif role.id == config.premium_economy_role_id: class_name = "Premium Economy"; break;
+        if role.id == config.first_class_role_id:
+            class_name = "First Class"
+            break
+        elif role.id == config.business_class_role_id:
+            class_name = "Business Class"
+            break
+        elif role.id == config.premium_economy_role_id:
+            class_name = "Premium Economy"
+            break
     avatar = ctx.message.author.avatar.url
     color = max(ctx.message.author.roles, key=lambda role: role.position).color
 
@@ -483,38 +553,50 @@ async def checkin(ctx):
     if not config.lh_mh_attributes["available_gates"]:
         await ctx.send("Sorry, no gates are available for check-in.")
         return
-    
+
     gate = random.choice(config.lh_mh_attributes["available_gates"])
-    
+
     # Check if seats are available for the member's class
-    if class_name == "First Class" and not config.lh_mh_attributes["available_first_class_seats"]:
+    if (
+        class_name == "First Class"
+        and not config.lh_mh_attributes["available_first_class_seats"]
+    ):
         await ctx.send("Sorry, no first class seats are available.")
         return
-    elif class_name == "Business Class" and not config.lh_mh_attributes["available_business_seats"]:
+    elif (
+        class_name == "Business Class"
+        and not config.lh_mh_attributes["available_business_seats"]
+    ):
         await ctx.send("Sorry, no business class seats are available.")
         return
-    elif class_name == "Premium Economy" and not config.lh_mh_attributes["available_premium_economy_seats"]:
+    elif (
+        class_name == "Premium Economy"
+        and not config.lh_mh_attributes["available_premium_economy_seats"]
+    ):
         await ctx.send("Sorry, no premium economy seats are available.")
         return
-    elif class_name == "Economy Class" and not config.lh_mh_attributes["available_economy_seats"]:
+    elif (
+        class_name == "Economy Class"
+        and not config.lh_mh_attributes["available_economy_seats"]
+    ):
         await ctx.send("Sorry, no economy seats are available.")
         return
-    
+
     # Assign seat based on class
-    if class_name == "First Class": 
+    if class_name == "First Class":
         seat = random.choice(config.lh_mh_attributes["available_first_class_seats"])
-    elif class_name == "Business Class": 
+    elif class_name == "Business Class":
         seat = random.choice(config.lh_mh_attributes["available_business_seats"])
-    elif class_name == "Premium Economy": 
+    elif class_name == "Premium Economy":
         seat = random.choice(config.lh_mh_attributes["available_premium_economy_seats"])
-    else: 
+    else:
         seat = random.choice(config.lh_mh_attributes["available_economy_seats"])
 
     # Create a boarding pass embed
     boarding_pass_embed = discord.Embed(
         title=class_name,
         description=airline,
-        color=color if color else discord.Color.blue()
+        color=color if color else discord.Color.blue(),
     )
     boarding_pass_embed.set_thumbnail(url=avatar)
     boarding_pass_embed.add_field(name="Departure Airport", value=departure_airport)
@@ -529,31 +611,37 @@ async def checkin(ctx):
     boarding_pass_embed.set_footer(text=f"Generated by GeoFS Events CoPilot")
 
     # Send the boarding pass embed to the member in DMs
-    try: await ctx.message.author.send(embed=boarding_pass_embed)
-    except discord.Forbidden: await ctx.send(f"{ctx.message.author.mention}, please enable DMs to continue check-in."); return
+    try:
+        await ctx.message.author.send(embed=boarding_pass_embed)
+    except discord.Forbidden:
+        await ctx.send(
+            f"{ctx.message.author.mention}, please enable DMs to continue check-in."
+        )
+        return
     await logger.info(f"Boarding pass sent to {ctx.message.author.mention}.")
 
     # Add the member to the check-in role
     await ctx.message.author.add_roles(checkin_role)
-    await logger.info(f"{ctx.message.author.mention} was assigned the check-in role for the long haul event.")
+    await logger.info(
+        f"{ctx.message.author.mention} was assigned the check-in role for the long haul event."
+    )
 
     # Remove the seat and gate from the available seats and gates
-    if class_name == "First Class": 
+    if class_name == "First Class":
         config.lh_mh_attributes["available_first_class_seats"].remove(seat)
-    elif class_name == "Business Class": 
+    elif class_name == "Business Class":
         config.lh_mh_attributes["available_business_seats"].remove(seat)
-    elif class_name == "Premium Economy": 
+    elif class_name == "Premium Economy":
         config.lh_mh_attributes["available_premium_economy_seats"].remove(seat)
-    else: 
+    else:
         config.lh_mh_attributes["available_economy_seats"].remove(seat)
-    
+
     config.lh_mh_attributes["available_gates"].remove(gate)
 
     # Save the updated configuration
     config.save()
 
     # Send a message to the channel
-    msg = f"{ctx.message.author.mention}, your boarding pass has been sent to your DMs." 
+    msg = f"{ctx.message.author.mention}, your boarding pass has been sent to your DMs."
     msg += "Proceed to Security Check with your boarding pass. Have a safe flight!"
     await ctx.send(msg)
-    

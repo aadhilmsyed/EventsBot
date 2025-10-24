@@ -3,7 +3,8 @@ Unit tests for longhauls.py module - Pure function tests only.
 """
 
 import os
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 
 
@@ -14,7 +15,7 @@ class TestLongHaulUtilities:
         """Test that lh_mh_attributes has the correct structure."""
         expected_attributes = {
             "departure_airport": "N/A",
-            "arrival_airport": "N/A", 
+            "arrival_airport": "N/A",
             "airline": "N/A",
             "flight_number": "N/A",
             "date": "N/A",
@@ -26,11 +27,11 @@ class TestLongHaulUtilities:
             "available_first_class_seats": [],
             "available_gates": [],
         }
-        
+
         # Test that all expected keys exist
         for key in expected_attributes:
             assert key in expected_attributes
-            
+
         # Test default values
         assert expected_attributes["departure_airport"] == "N/A"
         assert expected_attributes["available_economy_seats"] == []
@@ -43,15 +44,15 @@ class TestLongHaulUtilities:
         business_class_role_id = int(os.getenv("BUSINESS_CLASS_ROLE_ID"))
         premium_economy_role_id = int(os.getenv("PREMIUM_ECONOMY_ROLE_ID"))
         economy_class_role_id = int(os.getenv("ECONOMY_CLASS_ROLE_ID"))
-        
+
         # Test role ID mapping
         role_mapping = {
             first_class_role_id: "First Class",
-            business_class_role_id: "Business Class", 
+            business_class_role_id: "Business Class",
             premium_economy_role_id: "Premium Economy",
-            economy_class_role_id: "Economy Class"
+            economy_class_role_id: "Economy Class",
         }
-        
+
         # Verify all role IDs are valid integers
         for role_id, class_name in role_mapping.items():
             assert isinstance(role_id, int)
@@ -66,19 +67,29 @@ class TestLongHaulUtilities:
         premium_economy_seats = []
         business_seats = []
         first_class_seats = []
-        
-        total_seats = len(economy_seats) + len(premium_economy_seats) + len(business_seats) + len(first_class_seats)
+
+        total_seats = (
+            len(economy_seats)
+            + len(premium_economy_seats)
+            + len(business_seats)
+            + len(first_class_seats)
+        )
         assert total_seats == 0
-        
+
         # Test with seats available
         economy_seats = ["1A", "1B", "1C"]
         premium_economy_seats = ["2A", "2B"]
         business_seats = ["3A"]
         first_class_seats = ["4A", "4B", "4C", "4D"]
-        
-        total_seats = len(economy_seats) + len(premium_economy_seats) + len(business_seats) + len(first_class_seats)
+
+        total_seats = (
+            len(economy_seats)
+            + len(premium_economy_seats)
+            + len(business_seats)
+            + len(first_class_seats)
+        )
         assert total_seats == 10
-        
+
         # Test individual class availability
         assert len(economy_seats) == 3
         assert len(premium_economy_seats) == 2
@@ -90,11 +101,11 @@ class TestLongHaulUtilities:
         # Test empty gates
         available_gates = []
         assert len(available_gates) == 0
-        
+
         # Test with gates available
         available_gates = ["A1", "A2", "B1", "B2", "C1"]
         assert len(available_gates) == 5
-        
+
         # Test gate format (should be strings)
         for gate in available_gates:
             assert isinstance(gate, str)
@@ -105,19 +116,19 @@ class TestLongHaulUtilities:
         # Test required fields
         required_fields = [
             "departure_airport",
-            "arrival_airport", 
+            "arrival_airport",
             "airline",
             "flight_number",
             "date",
             "boarding_time",
-            "departure_time"
+            "departure_time",
         ]
-        
+
         # Test with N/A values (should fail validation)
         test_attributes = {field: "N/A" for field in required_fields}
         for field in required_fields:
             assert test_attributes[field] == "N/A"
-            
+
         # Test with valid values (should pass validation)
         valid_attributes = {
             "departure_airport": "JFK",
@@ -126,9 +137,9 @@ class TestLongHaulUtilities:
             "flight_number": "DL123",
             "date": "2024-01-15",
             "boarding_time": "14:30",
-            "departure_time": "15:00"
+            "departure_time": "15:00",
         }
-        
+
         for field in required_fields:
             assert valid_attributes[field] != "N/A"
             assert len(valid_attributes[field]) > 0
@@ -140,7 +151,7 @@ class TestLongHaulUtilities:
         premium_economy_seats = ["2A", "2B", "2C"]
         business_seats = ["3A", "3B"]
         first_class_seats = ["4A", "4B"]
-        
+
         # Test seat selection logic
         class_name = "Economy Class"
         if class_name == "First Class":
@@ -151,10 +162,10 @@ class TestLongHaulUtilities:
             available_seats = premium_economy_seats
         else:
             available_seats = economy_seats
-            
+
         assert available_seats == economy_seats
         assert len(available_seats) == 4
-        
+
         # Test other classes
         class_name = "First Class"
         if class_name == "First Class":
@@ -165,19 +176,19 @@ class TestLongHaulUtilities:
             available_seats = premium_economy_seats
         else:
             available_seats = economy_seats
-            
+
         assert available_seats == first_class_seats
         assert len(available_seats) == 2
 
     def test_gate_assignment_logic(self):
         """Test gate assignment logic."""
         available_gates = ["A1", "A2", "B1", "B2", "C1"]
-        
+
         # Test gate selection (simulate random.choice)
         selected_gate = available_gates[0]  # Mock random selection
         assert selected_gate in available_gates
         assert isinstance(selected_gate, str)
-        
+
         # Test gate removal
         available_gates.remove(selected_gate)
         assert selected_gate not in available_gates
@@ -188,11 +199,11 @@ class TestLongHaulUtilities:
         # Test check-in not started
         checkin_start = False
         assert not checkin_start
-        
+
         # Test check-in started
         checkin_start = True
         assert checkin_start
-        
+
         # Test state transitions
         assert isinstance(checkin_start, bool)
 
@@ -203,27 +214,35 @@ class TestLongHaulUtilities:
             "class_name": "First Class",
             "airline": "Delta",
             "departure_airport": "JFK",
-            "arrival_airport": "LAX", 
+            "arrival_airport": "LAX",
             "flight_number": "DL123",
             "date": "2024-01-15",
             "boarding_time": "14:30",
             "departure_time": "15:00",
             "gate": "A1",
             "seat": "4A",
-            "rewards_id": 123456789
+            "rewards_id": 123456789,
         }
-        
+
         # Test required fields
         required_fields = [
-            "class_name", "airline", "departure_airport", "arrival_airport",
-            "flight_number", "date", "boarding_time", "departure_time",
-            "gate", "seat", "rewards_id"
+            "class_name",
+            "airline",
+            "departure_airport",
+            "arrival_airport",
+            "flight_number",
+            "date",
+            "boarding_time",
+            "departure_time",
+            "gate",
+            "seat",
+            "rewards_id",
         ]
-        
+
         for field in required_fields:
             assert field in boarding_pass_data
             assert boarding_pass_data[field] is not None
-            
+
         # Test data types
         assert isinstance(boarding_pass_data["class_name"], str)
         assert isinstance(boarding_pass_data["airline"], str)
@@ -234,13 +253,13 @@ class TestLongHaulUtilities:
         # Mock role IDs from environment
         first_officer_role_id = int(os.getenv("FIRST_OFFICER_ROLE_ID"))
         lh_mh_checkin_role_id = int(os.getenv("LH_MH_CHECKIN_ROLE_ID"))
-        
+
         # Test role ID validation
         assert isinstance(first_officer_role_id, int)
         assert isinstance(lh_mh_checkin_role_id, int)
         assert first_officer_role_id > 0
         assert lh_mh_checkin_role_id > 0
-        
+
         # Test that both roles exist and are valid
         assert first_officer_role_id is not None
         assert lh_mh_checkin_role_id is not None
@@ -255,9 +274,9 @@ class TestLongHaulUtilities:
             "flight_number": "Flight number is not set. Please set the flight number using !set_flight_number <flight_number>.",
             "date": "Date is not set. Please set the date using !set_date <date>.",
             "boarding_time": "Boarding time is not set. Please set the boarding time using !set_boarding_time <boarding_time>.",
-            "departure_time": "Departure time is not set. Please set the departure time using !set_departure_time <departure_time>."
+            "departure_time": "Departure time is not set. Please set the departure time using !set_departure_time <departure_time>.",
         }
-        
+
         # Test that all error messages contain command guidance
         for field, message in error_messages.items():
             assert "!" in message  # Should contain command prefix
@@ -271,9 +290,9 @@ class TestLongHaulUtilities:
             "economy": "Available economy seats are not set. Please set the available economy seats using !set_available_economy_seats <seats>.",
             "premium_economy": "Available premium economy seats are not set. Please set the available premium economy seats using !set_available_premium_economy_seats <seats>.",
             "business": "Available business seats are not set. Please set the available business seats using !set_available_business_seats <seats>.",
-            "first_class": "Available first class seats are not set. Please set the available first class seats using !set_available_first_class_seats <seats>."
+            "first_class": "Available first class seats are not set. Please set the available first class seats using !set_available_first_class_seats <seats>.",
         }
-        
+
         # Test that seat error messages are specific and helpful
         for seat_class, message in seat_error_messages.items():
             assert seat_class in message.lower()
@@ -300,18 +319,21 @@ class TestLongHaulUtilities:
                 "available_premium_economy_seats": ["2A"],
                 "available_business_seats": ["3A", "3B"],
                 "available_first_class_seats": ["4A"],
-                "available_gates": ["A1", "A2"]
-            }
+                "available_gates": ["A1", "A2"],
+            },
         }
-        
+
         # Test that all data types are JSON serializable
         import json
+
         json_str = json.dumps(test_config)
         loaded_config = json.loads(json_str)
-        
+
         assert loaded_config == test_config
         assert isinstance(loaded_config["lh_mh_attributes"], dict)
-        assert isinstance(loaded_config["lh_mh_attributes"]["available_economy_seats"], list)
+        assert isinstance(
+            loaded_config["lh_mh_attributes"]["available_economy_seats"], list
+        )
 
 
 class TestLongHaulCommandValidation:
@@ -321,7 +343,7 @@ class TestLongHaulCommandValidation:
         """Test departure airport setting validation."""
         # Test valid airport codes
         valid_airports = ["JFK", "LAX", "ORD", "DFW", "ATL", "DEN", "SEA", "SFO"]
-        
+
         for airport in valid_airports:
             assert isinstance(airport, str)
             assert len(airport) >= 3
@@ -331,7 +353,7 @@ class TestLongHaulCommandValidation:
         """Test arrival airport setting validation."""
         # Test valid airport codes
         valid_airports = ["JFK", "LAX", "ORD", "DFW", "ATL", "DEN", "SEA", "SFO"]
-        
+
         for airport in valid_airports:
             assert isinstance(airport, str)
             assert len(airport) >= 3
@@ -339,8 +361,14 @@ class TestLongHaulCommandValidation:
     def test_set_airline_validation(self):
         """Test airline setting validation."""
         # Test valid airline names
-        valid_airlines = ["Delta", "American Airlines", "United", "Southwest", "JetBlue"]
-        
+        valid_airlines = [
+            "Delta",
+            "American Airlines",
+            "United",
+            "Southwest",
+            "JetBlue",
+        ]
+
         for airline in valid_airlines:
             assert isinstance(airline, str)
             assert len(airline) > 0
@@ -350,7 +378,7 @@ class TestLongHaulCommandValidation:
         """Test flight number setting validation."""
         # Test valid flight number formats
         valid_flight_numbers = ["DL123", "AA456", "UA789", "WN101", "B6123"]
-        
+
         for flight_number in valid_flight_numbers:
             assert isinstance(flight_number, str)
             assert len(flight_number) >= 3
@@ -360,7 +388,7 @@ class TestLongHaulCommandValidation:
         """Test date setting validation."""
         # Test valid date formats
         valid_dates = ["2024-01-15", "2024-12-25", "2025-06-01"]
-        
+
         for date in valid_dates:
             assert isinstance(date, str)
             assert len(date) == 10  # YYYY-MM-DD format
@@ -370,7 +398,7 @@ class TestLongHaulCommandValidation:
         """Test time setting validation."""
         # Test valid time formats
         valid_times = ["14:30", "09:15", "23:45", "00:00", "12:00"]
-        
+
         for time_str in valid_times:
             assert isinstance(time_str, str)
             assert len(time_str) == 5  # HH:MM format
@@ -380,7 +408,7 @@ class TestLongHaulCommandValidation:
         """Test seat setting validation."""
         # Test valid seat formats
         valid_seats = ["1A", "2B", "3C", "10D", "15F"]
-        
+
         for seat in valid_seats:
             assert isinstance(seat, str)
             assert len(seat) >= 2
@@ -390,7 +418,7 @@ class TestLongHaulCommandValidation:
         """Test gate setting validation."""
         # Test valid gate formats
         valid_gates = ["A1", "B2", "C3", "Gate1", "TerminalA"]
-        
+
         for gate in valid_gates:
             assert isinstance(gate, str)
             assert len(gate) >= 2
@@ -406,15 +434,20 @@ class TestLongHaulEdgeCases:
         premium_economy_seats = []
         business_seats = []
         first_class_seats = []
-        
+
         # Test availability checks
         assert len(economy_seats) == 0
         assert len(premium_economy_seats) == 0
         assert len(business_seats) == 0
         assert len(first_class_seats) == 0
-        
+
         # Test total availability
-        total = len(economy_seats) + len(premium_economy_seats) + len(business_seats) + len(first_class_seats)
+        total = (
+            len(economy_seats)
+            + len(premium_economy_seats)
+            + len(business_seats)
+            + len(first_class_seats)
+        )
         assert total == 0
 
     def test_empty_gate_list(self):
@@ -426,14 +459,14 @@ class TestLongHaulEdgeCases:
         """Test behavior with single seat/gate available."""
         economy_seats = ["1A"]
         available_gates = ["A1"]
-        
+
         assert len(economy_seats) == 1
         assert len(available_gates) == 1
-        
+
         # Test assignment
         seat = economy_seats[0]
         gate = available_gates[0]
-        
+
         assert seat == "1A"
         assert gate == "A1"
 
@@ -442,10 +475,10 @@ class TestLongHaulEdgeCases:
         # Test large seat lists
         economy_seats = [f"{i}A" for i in range(1, 101)]  # 100 seats
         available_gates = [f"A{i}" for i in range(1, 21)]  # 20 gates
-        
+
         assert len(economy_seats) == 100
         assert len(available_gates) == 20
-        
+
         # Test that we can handle large lists
         total_seats = len(economy_seats)
         assert total_seats == 100
@@ -454,7 +487,7 @@ class TestLongHaulEdgeCases:
         """Test handling of special characters in input."""
         # Test special characters in airport codes
         special_airports = ["JFK-1", "LAX@", "ORD#", "DFW$"]
-        
+
         for airport in special_airports:
             assert isinstance(airport, str)
             assert len(airport) > 0
@@ -463,7 +496,7 @@ class TestLongHaulEdgeCases:
         """Test handling of unicode characters."""
         # Test unicode in airline names
         unicode_airlines = ["Delta Δ", "American Airlines™", "United®", "Southwest©"]
-        
+
         for airline in unicode_airlines:
             assert isinstance(airline, str)
             assert len(airline) > 0
@@ -472,12 +505,12 @@ class TestLongHaulEdgeCases:
         """Test handling of very long strings."""
         # Test extremely long airline name
         long_airline = "A" * 1000
-        
+
         assert isinstance(long_airline, str)
         assert len(long_airline) == 1000
-        
+
         # Test extremely long flight number
         long_flight = "DL" + "1" * 100
-        
+
         assert isinstance(long_flight, str)
         assert len(long_flight) == 102
