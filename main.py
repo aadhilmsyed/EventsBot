@@ -28,7 +28,7 @@ from config import config
 from flight_logs import on_scheduled_event_update, on_voice_state_update
 
 # Import Member Commands
-from help import admin_help, help, mod_help
+from help import admin_help, help, lh_help, mod_help
 from logger import logger
 from member_commands import (
     dotspam,
@@ -48,22 +48,24 @@ from metar import atis, metar
 # Import Long Haul Commands
 from longhauls import (
     checkin,
-    clear_longhaul_attributes,
-    set_arrival,
-    set_available_business_seats,
-    set_available_economy_seats,
-    set_available_first_class_seats,
-    set_available_gates,
-    set_available_premium_economy_seats,
-    set_airline,
-    set_boarding_time,
-    set_date,
-    set_departure,
-    set_departure_time,
-    set_flight_number,
-    start_checkin,
-    stop_checkin,
-    view_longhaul_attributes,
+    clear_lh_attributes,
+    clear_lh_checkin_role,
+    clear_lh_security_role,
+    set_lh_arrival,
+    set_lh_available_business_seats,
+    set_lh_available_economy_seats,
+    set_lh_available_first_class_seats,
+    set_lh_available_gates,
+    set_lh_available_premium_economy_seats,
+    set_lh_airline,
+    set_lh_boarding_time,
+    set_lh_date,
+    set_lh_departure,
+    set_lh_departure_time,
+    set_lh_flight_number,
+    start_lh_checkin,
+    stop_lh_checkin,
+    view_lh_attributes,
 )
 
 # Import Moderator Commands
