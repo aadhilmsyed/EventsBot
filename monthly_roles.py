@@ -163,7 +163,9 @@ async def update_roles(ctx):
 
         # Step 5: Send event summary statistics
         num_events = len(flight_hours_manager.event_history)
-        summary = f"A total of {num_events} events took place during the current month."
+        num_members = len(flight_hours_manager.member_history)
+        summary = f"A total of {num_events} events took place during the current month "
+        summary += f"and a total of {num_members} members logged flight time."
         for event_name, members in flight_hours_manager.event_history.items():
             summary += f"\n- {event_name}: {len(members)} members"
         await ctx.send(summary)
