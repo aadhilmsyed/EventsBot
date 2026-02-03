@@ -1,6 +1,8 @@
 # Get the Token from the OS environment
 import os
+import random
 import sys
+import time
 
 import dotenv
 
@@ -18,6 +20,7 @@ if not TOKEN:
 
 # Import Discord Python Libraries
 import discord
+from discord.errors import HTTPException
 from discord.ext import commands
 
 # Import Bot & Logger Objects
@@ -88,5 +91,26 @@ from mod_commands import (
 )
 from monthly_roles import clear_flight_logs, update_roles
 
-# Start the Bot
-bot.run(TOKEN)
+# Retry config for Cloudflare Error 1015 (IP rate limit / temporary ban)
+MAX_RETRIES = 6
+BASE_DELAY = 45
+MAX_DELAY = 600  # 10 minutes cap
+
+# Stagger first connection to avoid thundering herd on cold start
+initial_delay = random.uniform(15, 45)
+print(f"Waiting {initial_delay:.1f}s before first connection (reduces Cloudflare 1015 on cold start)...")
+time.sleep(initial_delay)
+
+# Start the Bot with retry logic for Cloudflare rate limiting
+for attempt in range(MAX_RETRIES):
+    try:
+        bot.run(TOKEN)
+        break
+    except HTTPException as e:
+        is_rate_limit = e.status == 429 or "1015" in str(getattr(e, "response", "")) or "1015" in str(e)
+        if is_rate_limit and attempt < MAX_RETRIES - 1:
+            delay = min(BASE_DELAY * (2**attempt), MAX_DELAY)
+            print(f"Cloudflare rate limit (1015). Retrying in {delay:.0f}s (attempt {attempt + 1}/{MAX_RETRIES})...")
+            time.sleep(delay)
+        else:
+            raise
