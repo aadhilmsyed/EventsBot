@@ -71,6 +71,13 @@ async def help(ctx):
         inline=False,
     )
 
+    # Radar addon help
+    embed.add_field(
+        name="📡 **Radar Addon**",
+        value="`!radar_help`: Setup instructions for the radar addon",
+        inline=False,
+    )
+
     # Command Perks by Role (visible to all members)
     perks_text = "**Economy Class:** Basic commands only\n"
     perks_text += "**Premium Economy+:** `!dotspam [1-15]` - Spam dots (default: 10)\n"
@@ -96,6 +103,24 @@ async def help(ctx):
     )
 
     await ctx.send(embed=embed)
+
+
+@bot.command()
+async def radar_help(ctx):
+    radar_help_message = (
+        "To use the radar addon, please follow these steps:\n\n"
+        "1. Make sure you have Tampermonkey installed: <https://www.tampermonkey.net/>\n"
+        "2. Enable Developer Mode and allow user scripts:\n"
+        "   - Go to your browser's extensions page (e.g., `chrome://extensions`)\n"
+        "   - Toggle on **Developer mode** in the top right corner\n"
+        "   - Click on Tampermonkey to expand its details\n"
+        "   - Enable **\"Allow user scripts\"** (this is required for Tampermonkey to work)\n"
+        "3. Make sure you have installed the radar addon script: <https://xyzmani.com/radar>\n"
+        "4. After installing the script, go to GeoFS and ensure you have entered your departure, arrival, and callsign, then clicked \"Save\".\n"
+        "5. Now, you should be able to see yourself at: https://radarthing.com"
+    )
+
+    await ctx.send(radar_help_message)
 
 
 @bot.command()

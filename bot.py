@@ -30,6 +30,15 @@ def _patched_http_init(self, *args, **kwargs):
     if hasattr(self, 'user_agent'):
         self.user_agent = user_agent
         print(f"HTTPClient initialized - Set user_agent attribute: {user_agent}")
+    
+    # Also patch the aiohttp session if it exists
+    # discord.py uses aiohttp.ClientSession internally
+    try:
+        # Wait for session to be created (it might be created lazily)
+        # We'll patch it in setup_hook or when it's first accessed
+        pass
+    except Exception as e:
+        print(f"Note: Could not patch session in __init__: {e}")
 
 
 async def _patched_http_request(self, route, *, files=None, form=None, **kwargs):
@@ -42,9 +51,27 @@ async def _patched_http_request(self, route, *, files=None, form=None, **kwargs)
     # Always set User-Agent if not already set
     if 'User-Agent' not in headers:
         headers['User-Agent'] = user_agent
+        print(f"✓ Added User-Agent to request headers: {user_agent}")
+    else:
+        print(f"✓ User-Agent already in headers: {headers.get('User-Agent')}")
     
     kwargs['headers'] = headers
-    return await _original_http_request(self, route, files=files, form=form, **kwargs)
+    
+    # Also ensure the user_agent attribute is set on the HTTPClient
+    if hasattr(self, 'user_agent'):
+        self.user_agent = user_agent
+    
+    try:
+        return await _original_http_request(self, route, files=files, form=form, **kwargs)
+    except discord.errors.HTTPException as e:
+        # Handle Cloudflare rate limiting (Error 1015)
+        if e.status == 429 or (e.status == 403 and '1015' in str(e.response)):
+            error_msg = str(e.response) if hasattr(e, 'response') else str(e)
+            if '1015' in error_msg or 'rate limit' in error_msg.lower():
+                print(f"⚠ Cloudflare Error 1015: IP temporarily banned. This usually clears in 15-60 minutes.")
+                print(f"   The User-Agent header is correctly configured: {user_agent}")
+                print(f"   Please wait for the IP ban to expire before retrying.")
+        raise
 
 
 # Apply the monkey-patch
@@ -59,10 +86,37 @@ class CustomBot(commands.Bot):
     async def setup_hook(self):
         """Called when the bot is being set up, before login"""
         await super().setup_hook()
-        # Verify User-Agent is configured (module-level patch should have handled it)
+        # Verify User-Agent is configured and patch aiohttp session
         if hasattr(self, 'http') and self.http:
             if hasattr(self.http, 'user_agent'):
                 print(f"✓ Verified User-Agent in HTTPClient: {self.http.user_agent}")
+            
+            # Also patch the aiohttp session's default headers
+            try:
+                # Try to access the session
+                session = None
+                if hasattr(self.http, '_HTTPClient__session'):
+                    session = self.http._HTTPClient__session
+                elif hasattr(self.http, 'session'):
+                    session = self.http.session
+                elif hasattr(self.http, '_session'):
+                    session = self.http._session
+                
+                if session:
+                    # Update the session's default headers
+                    if not hasattr(session, '_default_headers'):
+                        session._default_headers = {}
+                    session._default_headers['User-Agent'] = user_agent
+                    print(f"✓ Set aiohttp session _default_headers['User-Agent']: {user_agent}")
+                    
+                    # Also ensure it's in the headers dict if it exists
+                    if hasattr(session, 'headers'):
+                        if session.headers is None:
+                            session.headers = {}
+                        session.headers['User-Agent'] = user_agent
+                        print(f"✓ Set aiohttp session headers['User-Agent']: {user_agent}")
+            except Exception as e:
+                print(f"Note: Could not patch aiohttp session: {e}")
 
 
 # Define Intents & Create Bot Object
