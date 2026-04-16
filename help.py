@@ -115,9 +115,10 @@ async def radar_help(ctx):
         "   - Toggle on **Developer mode** in the top right corner\n"
         "   - Click on Tampermonkey to expand its details\n"
         "   - Enable **\"Allow user scripts\"** (this is required for Tampermonkey to work)\n"
-        "3. Make sure you have installed the radar addon script: <https://xyzmani.com/radar>\n"
-        "4. After installing the script, go to GeoFS and ensure you have entered your departure, arrival, and callsign, then clicked \"Save\".\n"
-        "5. Now, you should be able to see yourself at: https://radarthing.com"
+        "3. Make sure you have installed the radar addon script: <https://radarthing.com/userscript>\n"
+        "4. You can also copy-paste the code manually from <https://radarthing.com/loader>, but copy-pasting is still not recommended.\n"
+        "5. After installing the script, go to GeoFS and ensure you have entered your departure, arrival, and callsign, then clicked \"Save\".\n"
+        "6. Now, you should be able to see yourself at: https://radarthing.com"
     )
 
     await ctx.send(radar_help_message)
